@@ -2,7 +2,25 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { compare, hash } from "bcryptjs";
-import { sql } from "@vercel/postgres";
+import { Client } from "pg";
+
+function sanitizeDatabaseEnvVars() {
+  for (const key of [
+    "POSTGRES_URL",
+    "POSTGRES_PRISMA_URL",
+    "DATABASE_URL",
+    "PRISMA_DATABASE_URL",
+  ] as const) {
+    const raw = process.env[key];
+    if (typeof raw !== "string") continue;
+    const trimmed = raw.trim().replace(/^"(.*)"$/, "$1");
+    if (trimmed && trimmed !== raw) {
+      process.env[key] = trimmed;
+    }
+  }
+}
+
+sanitizeDatabaseEnvVars();
 
 export type PlannerRole = "CEO" | "CTO" | "Member";
 export type UserStatus = "Active" | "Disabled";
@@ -290,20 +308,59 @@ function hasPostgresConfig() {
   );
 }
 
+function getPostgresConnectionString() {
+  const candidates = [
+    process.env.POSTGRES_URL,
+    process.env.POSTGRES_PRISMA_URL,
+    process.env.DATABASE_URL,
+    process.env.PRISMA_DATABASE_URL,
+  ];
+
+  for (const raw of candidates) {
+    const value = String(raw || "").trim();
+    if (value) return value;
+  }
+
+  return "";
+}
+
+async function withPostgresClient<T>(
+  callback: (client: Client) => Promise<T>,
+) {
+  const connectionString = getPostgresConnectionString();
+  if (!connectionString) {
+    throw new Error("postgres_connection_string_missing");
+  }
+
+  const client = new Client({
+    connectionString,
+    ssl: { rejectUnauthorized: false },
+  });
+  await client.connect();
+  try {
+    return await callback(client);
+  } finally {
+    await client.end();
+  }
+}
+
 async function ensurePostgresReady() {
   if (!hasPostgresConfig()) return false;
   if (!postgresReady) {
     postgresReady = (async () => {
       try {
-        await sql`
-          CREATE TABLE IF NOT EXISTS flora_planer_state (
-            id TEXT PRIMARY KEY,
-            payload JSONB NOT NULL,
-            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-          )
-        `;
+        await withPostgresClient(async (client) => {
+          await client.query(`
+            CREATE TABLE IF NOT EXISTS flora_planer_state (
+              id TEXT PRIMARY KEY,
+              payload JSONB NOT NULL,
+              updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            )
+          `);
+        });
         return true;
-      } catch {
+      } catch (error) {
+        console.error("[flora-planer] postgres bootstrap failed", error);
         return false;
       }
     })();
@@ -1626,12 +1683,17 @@ async function writePlannerData(data: PlannerData) {
     }
 
     try {
-      await sql`
-          INSERT INTO flora_planer_state (id, payload, updated_at)
-          VALUES (${DB_STATE_KEY}, ${JSON.stringify(cloned)}::jsonb, NOW())
-          ON CONFLICT (id)
-          DO UPDATE SET payload = EXCLUDED.payload, updated_at = EXCLUDED.updated_at
-        `;
+      await withPostgresClient(async (client) => {
+        await client.query(
+          `
+            INSERT INTO flora_planer_state (id, payload, updated_at)
+            VALUES ($1, $2::jsonb, NOW())
+            ON CONFLICT (id)
+            DO UPDATE SET payload = EXCLUDED.payload, updated_at = EXCLUDED.updated_at
+          `,
+          [DB_STATE_KEY, JSON.stringify(cloned)],
+        );
+      });
       return;
     } catch (error) {
       console.error("[flora-planer] writePlannerData postgres error", error);
@@ -1658,12 +1720,17 @@ export async function readPlannerData() {
     }
 
     try {
-      const result = await sql`
-        SELECT payload
-        FROM flora_planer_state
-        WHERE id = ${DB_STATE_KEY}
-        LIMIT 1
-      `;
+      const result = await withPostgresClient(async (client) =>
+        client.query(
+          `
+            SELECT payload
+            FROM flora_planer_state
+            WHERE id = $1
+            LIMIT 1
+          `,
+          [DB_STATE_KEY],
+        ),
+      );
 
       if (result.rows.length > 0) {
         const payload = result.rows[0]?.payload;
