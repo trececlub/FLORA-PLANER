@@ -43,11 +43,27 @@ function getConfiguredSecret() {
       .digest("hex");
   }
 
-  if (process.env.NODE_ENV !== "production") {
-    return "flora-planer-dev-insecure-secret";
+  const vercelDerivedSource = [
+    String(process.env.VERCEL_PROJECT_ID || "").trim(),
+    String(process.env.VERCEL_GIT_REPO_ID || "").trim(),
+    String(process.env.VERCEL_URL || "").trim(),
+  ]
+    .filter(Boolean)
+    .join(":");
+
+  if (vercelDerivedSource) {
+    return createHash("sha256")
+      .update(`flora-planer:${vercelDerivedSource}`)
+      .digest("hex");
   }
 
-  return "";
+  // Keep sessions working even if no secret/env is configured in production.
+  // This fallback should still be replaced with FLORA_PLANER_SESSION_SECRET.
+  if (process.env.NODE_ENV === "production") {
+    return "flora-planer-production-fallback-secret-change-me";
+  }
+
+  return "flora-planer-dev-insecure-secret";
 }
 
 function signPayload(payloadBase64Url: string, secret: string) {
