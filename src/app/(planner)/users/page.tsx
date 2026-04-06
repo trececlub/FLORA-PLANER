@@ -140,62 +140,65 @@ export default async function UsersPage({ searchParams }: PageProps) {
                     <p className="list-subtitle">Cuenta administradora protegida: no editable desde gestion.</p>
                   ) : (
                     <div className="actions-row">
-                      <form action={updateUserAction} className="form-grid" encType="multipart/form-data">
-                        <input type="hidden" name="returnTo" value="/users" />
-                        <input type="hidden" name="targetUserId" value={user.id} />
-                        <label>
-                          Nombre
-                          <input name="name" defaultValue={user.name} required />
-                        </label>
-                        <label>
-                          Email
-                          <input name="email" type="email" defaultValue={user.email} required />
-                        </label>
-                        <label>
-                          Rol del proyecto
-                          <select name="projectRole" defaultValue={user.projectRole}>
-                            {projectRoles.map((projectRole) => (
-                              <option key={projectRole} value={projectRole}>
-                                {projectRoleLabel[projectRole]}
-                              </option>
-                            ))}
-                          </select>
-                        </label>
-                        <label>
-                          Cargo
-                          <input name="jobTitle" defaultValue={user.jobTitle} />
-                        </label>
-                        <label>
-                          Telefono
-                          <input name="phone" defaultValue={user.phone} />
-                        </label>
-                        <label>
-                          Foto
-                          <input name="avatar" type="file" accept="image/png,image/jpeg,image/webp,image/gif" />
-                        </label>
-                        <label className="checkbox-line">
-                          <input name="removeAvatar" type="checkbox" />
-                          Quitar foto
-                        </label>
-                        <label>
-                          Biografia
-                          <textarea name="bio" rows={3} defaultValue={user.bio} />
-                        </label>
-                        <label>
-                          Clave (opcional)
-                          <input name="password" placeholder="Deja vacio para mantener" />
-                        </label>
-                        <label>
-                          Estado
-                          <select name="status" defaultValue={user.status}>
-                            <option value="Active">Activo</option>
-                            <option value="Disabled">Deshabilitado</option>
-                          </select>
-                        </label>
-                        <button className="btn btn-ghost" type="submit">
-                          Guardar cambios
-                        </button>
-                      </form>
+                      <details className="fold-card">
+                        <summary>Editar usuario</summary>
+                        <form action={updateUserAction} className="form-grid" encType="multipart/form-data">
+                          <input type="hidden" name="returnTo" value="/users" />
+                          <input type="hidden" name="targetUserId" value={user.id} />
+                          <label>
+                            Nombre
+                            <input name="name" defaultValue={user.name} required />
+                          </label>
+                          <label>
+                            Email
+                            <input name="email" type="email" defaultValue={user.email} required />
+                          </label>
+                          <label>
+                            Rol del proyecto
+                            <select name="projectRole" defaultValue={user.projectRole}>
+                              {projectRoles.map((projectRole) => (
+                                <option key={projectRole} value={projectRole}>
+                                  {projectRoleLabel[projectRole]}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                          <label>
+                            Cargo
+                            <input name="jobTitle" defaultValue={user.jobTitle} />
+                          </label>
+                          <label>
+                            Telefono
+                            <input name="phone" defaultValue={user.phone} />
+                          </label>
+                          <label>
+                            Foto
+                            <input name="avatar" type="file" accept="image/png,image/jpeg,image/webp,image/gif" />
+                          </label>
+                          <label className="checkbox-line">
+                            <input name="removeAvatar" type="checkbox" />
+                            Quitar foto
+                          </label>
+                          <label>
+                            Biografia
+                            <textarea name="bio" rows={3} defaultValue={user.bio} />
+                          </label>
+                          <label>
+                            Clave (opcional)
+                            <input name="password" placeholder="Deja vacio para mantener" />
+                          </label>
+                          <label>
+                            Estado
+                            <select name="status" defaultValue={user.status}>
+                              <option value="Active">Activo</option>
+                              <option value="Disabled">Deshabilitado</option>
+                            </select>
+                          </label>
+                          <button className="btn btn-ghost" type="submit">
+                            Guardar cambios
+                          </button>
+                        </form>
+                      </details>
 
                       <DeleteConfirmForm
                         action={deleteUserAction}
