@@ -1,10 +1,11 @@
-import { createHash, createHmac, timingSafeEqual } from "node:crypto";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import type { PlannerRole } from "@/lib/data-store";
 
 const SESSION_SECRET_ENV_KEYS = [
   "FLORA_PLANER_SESSION_SECRET",
   "FLORA_PLANNER_SESSION_SECRET",
   "LOOP_PLANNER_SESSION_SECRET",
+  "SESSION_SECRET",
   "AUTH_SECRET",
   "NEXTAUTH_SECRET",
 ] as const;
@@ -33,34 +34,10 @@ function getConfiguredSecret() {
     if (value) return value;
   }
 
-  const derivedSource =
-    String(process.env.POSTGRES_URL || "").trim() ||
-    String(process.env.POSTGRES_PRISMA_URL || "").trim() ||
-    String(process.env.DATABASE_URL || "").trim();
-  if (derivedSource) {
-    return createHash("sha256")
-      .update(`flora-planer:${derivedSource}`)
-      .digest("hex");
-  }
-
-  const vercelDerivedSource = [
-    String(process.env.VERCEL_PROJECT_ID || "").trim(),
-    String(process.env.VERCEL_GIT_REPO_ID || "").trim(),
-    String(process.env.VERCEL_URL || "").trim(),
-  ]
-    .filter(Boolean)
-    .join(":");
-
-  if (vercelDerivedSource) {
-    return createHash("sha256")
-      .update(`flora-planer:${vercelDerivedSource}`)
-      .digest("hex");
-  }
-
   // Keep sessions working even if no secret/env is configured in production.
   // This fallback should still be replaced with FLORA_PLANER_SESSION_SECRET.
   if (process.env.NODE_ENV === "production") {
-    return "flora-planer-production-fallback-secret-change-me";
+    return "flora-planer-production-session-secret-fallback-change-me";
   }
 
   return "flora-planer-dev-insecure-secret";
