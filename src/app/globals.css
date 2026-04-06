@@ -39,7 +39,7 @@ h3,
 .sidebar-title,
 .metric-value,
 .list-title {
-  font-family: var(--font-display), Georgia, serif;
+  font-family: var(--font-display), var(--font-body), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 a {
