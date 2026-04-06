@@ -20,10 +20,10 @@ export async function POST(request: Request) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("error", "invalid");
     loginUrl.searchParams.set("next", nextPath);
-    return NextResponse.redirect(loginUrl);
+    return NextResponse.redirect(loginUrl, 303);
   }
 
   await createSession(user, { rememberMe });
   const target = user.mustChangePassword ? "/profile?forcePassword=1" : nextPath;
-  return NextResponse.redirect(new URL(target, request.url));
+  return NextResponse.redirect(new URL(target, request.url), 303);
 }
