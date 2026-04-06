@@ -12,11 +12,11 @@ type NavItem = {
 };
 
 const items: NavItem[] = [
+  { href: "/notifications", label: "Notificaciones", visible: (permissions) => permissions.canViewDashboard },
   { href: "/dashboard", label: "Inicio", visible: (permissions) => permissions.canViewDashboard },
   { href: "/projects", label: "Proyectos", visible: (permissions) => permissions.canManageProjects },
   { href: "/tasks", label: "Tareas", visible: (permissions) => permissions.canManageTasks },
   { href: "/goals", label: "Metas", visible: (permissions) => permissions.canManageProjects },
-  { href: "/notifications", label: "Notificaciones", visible: (permissions) => permissions.canViewDashboard },
   { href: "/chat", label: "Chat", visible: (permissions) => permissions.canUseChat },
   { href: "/meetings", label: "Reuniones", visible: (permissions) => permissions.canManageMeetings },
   { href: "/process", label: "Proceso", visible: (permissions) => permissions.canManageProcess },
