@@ -1,0 +1,229 @@
+{
+  "users": [
+    {
+      "id": "user_owner",
+      "name": "Admin FLORA",
+      "email": "admin@floraplaner.local",
+      "password": "flora123",
+      "role": "CEO",
+      "status": "Active",
+      "jobTitle": "Direccion de proyecto",
+      "phone": "+57 300 000 0000",
+      "bio": "Cuenta administradora para gestionar acceso y decisiones del proyecto.",
+      "avatarDataUrl": "",
+      "createdAt": "2026-04-06T16:00:00.000Z"
+    }
+  ],
+  "projects": [
+    {
+      "id": "project_flora_branding",
+      "name": "Branding Cafe FLORA",
+      "description": "Sistema de marca para cafe de especialidad en Cartagena de Indias.",
+      "status": "InProgress",
+      "priority": "High",
+      "createdByUserId": "user_owner",
+      "createdByRole": "CEO",
+      "ownerId": "user_owner",
+      "startDate": "2026-04-06",
+      "dueDate": "2026-05-08",
+      "progress": 34,
+      "stages": [
+        {
+          "id": "project_flora_branding_stage_1",
+          "name": "Investigacion"
+        },
+        {
+          "id": "project_flora_branding_stage_2",
+          "name": "Direccion visual"
+        },
+        {
+          "id": "project_flora_branding_stage_3",
+          "name": "Validacion"
+        },
+        {
+          "id": "project_flora_branding_stage_4",
+          "name": "Entrega"
+        }
+      ],
+      "tags": [
+        "branding",
+        "cafe",
+        "cartagena"
+      ],
+      "createdAt": "2026-04-06T16:05:00.000Z",
+      "updatedAt": "2026-04-06T16:05:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "task_flora_moodboard",
+      "projectId": "project_flora_branding",
+      "stageId": "project_flora_branding_stage_1",
+      "title": "Cerrar moodboard de referencias",
+      "details": "Definir direccion visual: tropical elegante, artesanal premium.",
+      "status": "Doing",
+      "priority": "High",
+      "assigneeId": "user_owner",
+      "dueDate": "2026-04-10",
+      "createdAt": "2026-04-06T16:10:00.000Z",
+      "updatedAt": "2026-04-06T16:10:00.000Z"
+    },
+    {
+      "id": "task_flora_packaging",
+      "projectId": "project_flora_branding",
+      "stageId": "project_flora_branding_stage_2",
+      "title": "Iteracion de etiquetas para bolsas",
+      "details": "Variantes kraft, blanco y negro profundo.",
+      "status": "Review",
+      "priority": "Medium",
+      "assigneeId": "user_owner",
+      "dueDate": "2026-04-15",
+      "createdAt": "2026-04-06T16:12:00.000Z",
+      "updatedAt": "2026-04-06T16:12:00.000Z"
+    }
+  ],
+  "goals": [
+    {
+      "id": "goal_flora_brand_book",
+      "title": "Entregar manual base de marca",
+      "ownerId": "user_owner",
+      "targetDate": "2026-05-08",
+      "progress": 32,
+      "status": "AtRisk",
+      "notes": "Falta validar paleta final y criterios de uso para redes.",
+      "createdAt": "2026-04-06T16:14:00.000Z",
+      "updatedAt": "2026-04-06T16:14:00.000Z"
+    }
+  ],
+  "processSteps": [
+    {
+      "id": "step_flora_1",
+      "phase": "Marca",
+      "title": "Definir territorio de marca",
+      "description": "Sintesis narrativa y tono de voz de la marca.",
+      "ownerId": "user_owner",
+      "status": "InProgress",
+      "targetDate": "2026-04-12",
+      "createdAt": "2026-04-06T16:16:00.000Z",
+      "updatedAt": "2026-04-06T16:16:00.000Z"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "decision_flora_palette",
+      "title": "Direccion cromatica principal",
+      "context": "Se evaluaron propuestas frias y calidas.",
+      "decision": "Mantener paleta calida con verdes botanicos y acento terracota.",
+      "ownerId": "user_owner",
+      "date": "2026-04-06",
+      "createdAt": "2026-04-06T16:18:00.000Z"
+    }
+  ],
+  "docs": [
+    {
+      "id": "doc_flora_brief",
+      "title": "Brief de marca",
+      "category": "Estrategia",
+      "url": "",
+      "notes": "Incluye publico objetivo, competencia y diferenciadores.",
+      "updatedAt": "2026-04-06T16:20:00.000Z"
+    }
+  ],
+  "weeklyReviews": [],
+  "meetings": [
+    {
+      "id": "meeting_flora_sync",
+      "title": "Revision semanal de avances",
+      "kind": "Internal",
+      "status": "Scheduled",
+      "date": "2026-04-09",
+      "startTime": "09:00",
+      "endTime": "09:45",
+      "attendees": [
+        "Admin FLORA"
+      ],
+      "notes": "Revisar estado de logo, paleta y piezas de empaque.",
+      "ownerId": "user_owner",
+      "createdAt": "2026-04-06T16:22:00.000Z",
+      "updatedAt": "2026-04-06T16:22:00.000Z"
+    }
+  ],
+  "chatThreads": [
+    {
+      "id": "thread_group_flora",
+      "kind": "Group",
+      "title": "Chat grupal FLORA",
+      "memberIds": [
+        "user_owner"
+      ],
+      "createdAt": "2026-04-06T16:23:00.000Z",
+      "updatedAt": "2026-04-06T16:23:00.000Z"
+    }
+  ],
+  "chatMessages": [],
+  "chatReadStates": [],
+  "userPresence": [],
+  "galleryEntries": [
+    {
+      "id": "gallery_logo_v1",
+      "title": "Logo principal monocromatico",
+      "pieceKey": "logo_principal",
+      "version": "v1",
+      "category": "Logo",
+      "stage": "Propuesta",
+      "status": "InReview",
+      "description": "Primera propuesta con enfoque artesanal y legibilidad en fachada.",
+      "imageUrl": "https://images.unsplash.com/photo-1453614512568-c4024d13c247?auto=format&fit=crop&w=1200&q=80",
+      "responsibleUserId": "user_owner",
+      "createdByUserId": "user_owner",
+      "createdAt": "2026-04-06T16:24:00.000Z",
+      "updatedAt": "2026-04-06T16:24:00.000Z"
+    },
+    {
+      "id": "gallery_palette_v2",
+      "title": "Paleta calida tropical",
+      "pieceKey": "paleta_base",
+      "version": "v2",
+      "category": "Paleta",
+      "stage": "Ajustes",
+      "status": "Approved",
+      "description": "Ajuste de contraste para menus y señaletica en interior.",
+      "imageUrl": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1200&q=80",
+      "responsibleUserId": "user_owner",
+      "createdByUserId": "user_owner",
+      "createdAt": "2026-04-06T16:25:00.000Z",
+      "updatedAt": "2026-04-06T16:25:00.000Z"
+    },
+    {
+      "id": "gallery_packaging_v1",
+      "title": "Bolsa cafe 340g",
+      "pieceKey": "packaging_bolsa_340g",
+      "version": "v1",
+      "category": "Packaging",
+      "stage": "Bocetos",
+      "status": "Pending",
+      "description": "Exploracion de composicion frontal para etiqueta kraft.",
+      "imageUrl": "https://images.unsplash.com/photo-1498804103079-a6351b050096?auto=format&fit=crop&w=1200&q=80",
+      "responsibleUserId": "user_owner",
+      "createdByUserId": "user_owner",
+      "createdAt": "2026-04-06T16:26:00.000Z",
+      "updatedAt": "2026-04-06T16:26:00.000Z"
+    }
+  ],
+  "galleryComments": [
+    {
+      "id": "gallery_comment_1",
+      "entryId": "gallery_logo_v1",
+      "userId": "user_owner",
+      "text": "Ajustar espaciado interno para mejorar lectura a distancia.",
+      "createdAt": "2026-04-06T16:27:00.000Z"
+    },
+    {
+      "id": "gallery_comment_2",
+      "entryId": "gallery_packaging_v1",
+      "userId": "user_owner",
+      "text": "Probar una variante con mayor presencia del origen Cartagena.",
+      "createdAt": "2026-04-06T16:28:00.000Z"
+    }
+  ]
+}
