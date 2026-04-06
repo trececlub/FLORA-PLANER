@@ -50,10 +50,12 @@ export function SaveMessage({
             ? "No se pudo subir la imagen. Intenta de nuevo."
           : error === "protected_role"
             ? "La cuenta administradora esta protegida."
-            : error === "cannot_delete_self"
+          : error === "cannot_delete_self"
               ? "No puedes eliminar tu propia cuenta."
               : error === "invalid_role"
                 ? "Solo se pueden crear usuarios tipo Miembro."
+                : error === "password_required"
+                  ? "Debes definir una nueva contraseña para continuar."
                 : error === "not_found"
                   ? "No se encontro el registro solicitado."
           : "No se pudo completar la accion.";

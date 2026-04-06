@@ -21,8 +21,8 @@ export function proxy(req: NextRequest) {
   }
 
   const sessionToken = req.cookies.get(SESSION_COOKIE)?.value;
-  const sessionIsValid = Boolean(readSessionClaims(sessionToken));
-  if (!sessionIsValid) {
+  const claims = readSessionClaims(sessionToken);
+  if (!claims) {
     const loginUrl = req.nextUrl.clone();
     loginUrl.pathname = "/login";
     loginUrl.searchParams.set("next", `${pathname}${search}`);
@@ -31,6 +31,14 @@ export function proxy(req: NextRequest) {
       response.cookies.delete(SESSION_COOKIE);
     }
     return response;
+  }
+
+  const isProfilePath = pathname === "/profile" || pathname.startsWith("/profile/");
+  if (claims.mustChangePassword && !isProfilePath) {
+    const profileUrl = req.nextUrl.clone();
+    profileUrl.pathname = "/profile";
+    profileUrl.searchParams.set("forcePassword", "1");
+    return NextResponse.redirect(profileUrl);
   }
 
   return NextResponse.next();

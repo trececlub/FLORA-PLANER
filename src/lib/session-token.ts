@@ -18,6 +18,7 @@ export type SessionClaims = {
   v: number;
   sub: string;
   role: PlannerRole;
+  mustChangePassword: boolean;
   iat: number;
   exp: number;
 };
@@ -65,6 +66,7 @@ function decodeClaims(payloadBase64Url: string) {
     if (parsed.v !== TOKEN_VERSION) return null;
     if (typeof parsed.sub !== "string" || !parsed.sub.trim()) return null;
     if (!VALID_ROLES.has(parsed.role as PlannerRole)) return null;
+    if (typeof parsed.mustChangePassword !== "boolean") return null;
     if (typeof iat !== "number" || !Number.isInteger(iat)) return null;
     if (typeof exp !== "number" || !Number.isInteger(exp)) return null;
     if (exp <= iat) return null;
@@ -73,6 +75,7 @@ function decodeClaims(payloadBase64Url: string) {
       v: parsed.v,
       sub: parsed.sub.trim(),
       role: parsed.role as PlannerRole,
+      mustChangePassword: parsed.mustChangePassword,
       iat,
       exp,
     } satisfies SessionClaims;
@@ -84,6 +87,7 @@ function decodeClaims(payloadBase64Url: string) {
 export function createSessionToken(input: {
   userId: string;
   role: PlannerRole;
+  mustChangePassword: boolean;
   rememberMe?: boolean;
   nowMs?: number;
 }) {
@@ -96,6 +100,7 @@ export function createSessionToken(input: {
     v: TOKEN_VERSION,
     sub: input.userId,
     role: input.role,
+    mustChangePassword: input.mustChangePassword,
     iat: nowSeconds,
     exp: nowSeconds + ttl,
   };

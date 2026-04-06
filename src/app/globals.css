@@ -358,6 +358,23 @@ textarea:focus {
   gap: 7px;
 }
 
+.planner-nav-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.notification-bell-icon {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+}
+
 .planner-sidebar-link:hover {
   background: #eef4ff;
   color: #2d4f9a !important;

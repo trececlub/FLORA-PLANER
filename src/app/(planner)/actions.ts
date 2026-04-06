@@ -5,7 +5,7 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { put } from "@vercel/blob";
-import { clearSession, requireSessionUser } from "@/lib/auth";
+import { clearSession, createSession, requireSessionUser } from "@/lib/auth";
 import {
   addGalleryEntryComment,
   createGalleryEntry,
@@ -17,6 +17,7 @@ import {
   createProject,
   createTask,
   createUser,
+  markAllNotificationsAsRead,
   sendChatMessage,
   deleteAllWeeklyReviews,
   deleteDecision,
@@ -186,6 +187,7 @@ function revalidatePlannerViews() {
   revalidatePath("/weekly");
   revalidatePath("/meetings");
   revalidatePath("/chat");
+  revalidatePath("/notifications");
   revalidatePath("/gallery");
   revalidatePath("/users");
   revalidatePath("/profile");
@@ -276,6 +278,7 @@ export async function createTaskAction(formData: FormData) {
     status: String(formData.get("status") || "Backlog") as TaskStatus,
     priority: String(formData.get("priority") || "Medium") as TaskPriority,
     assigneeId: String(formData.get("assigneeId") || user.id),
+    createdByUserId: user.id,
     dueDate: String(formData.get("dueDate") || "").trim(),
   });
 
@@ -605,6 +608,7 @@ export async function updateProfileAction(formData: FormData) {
     name: String(formData.get("name") || "").trim(),
     email: String(formData.get("email") || "").trim(),
     password: String(formData.get("password") || "").trim(),
+    requirePasswordChange: user.mustChangePassword,
     jobTitle: String(formData.get("jobTitle") || "").trim(),
     phone: String(formData.get("phone") || "").trim(),
     bio: String(formData.get("bio") || "").trim(),
@@ -612,7 +616,18 @@ export async function updateProfileAction(formData: FormData) {
   });
 
   revalidatePlannerViews();
+  if (result.ok) {
+    await createSession(result.user);
+  }
   redirectWithResult(returnTo, "profile", result.ok ? undefined : result.error);
+}
+
+export async function markNotificationsReadAction(formData: FormData) {
+  const user = await requireSessionUser();
+  const returnTo = normalizePath(formData.get("returnTo"), "/notifications");
+  const result = await markAllNotificationsAsRead(user.id);
+  revalidatePlannerViews();
+  redirectWithResult(returnTo, "notifications", result.ok ? undefined : result.error);
 }
 
 export async function deleteGoalAction(formData: FormData) {

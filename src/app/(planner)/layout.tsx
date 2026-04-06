@@ -4,11 +4,12 @@ import { requireSessionUser } from "@/lib/auth";
 import { PlannerMobileTabs, PlannerSidebarNav } from "@/components/planner-nav";
 import { PresenceHeartbeat } from "@/components/presence-heartbeat";
 import { logoutAction } from "@/app/(planner)/actions";
-import { getChatUnreadSummary } from "@/lib/data-store";
+import { getChatUnreadSummary, getNotificationUnreadSummary } from "@/lib/data-store";
 
 export default async function PlannerLayout({ children }: { children: ReactNode }) {
   const user = await requireSessionUser();
   const chatUnread = await getChatUnreadSummary(user.id);
+  const notificationsUnread = await getNotificationUnreadSummary(user.id);
   const initials = user.name
     .split(" ")
     .map((part) => part[0] || "")
@@ -33,7 +34,11 @@ export default async function PlannerLayout({ children }: { children: ReactNode 
           <h1 className="sidebar-title">Panel de marca</h1>
         </div>
 
-        <PlannerSidebarNav role={user.role} initialHasChatUnread={chatUnread.hasUnread} />
+        <PlannerSidebarNav
+          role={user.role}
+          initialHasChatUnread={chatUnread.hasUnread}
+          initialHasNotificationUnread={notificationsUnread.hasUnread}
+        />
 
         <div className="sidebar-user mt-auto">
           <div className="sidebar-user-head">
@@ -81,7 +86,11 @@ export default async function PlannerLayout({ children }: { children: ReactNode 
           </form>
         </header>
 
-        <PlannerMobileTabs role={user.role} initialHasChatUnread={chatUnread.hasUnread} />
+        <PlannerMobileTabs
+          role={user.role}
+          initialHasChatUnread={chatUnread.hasUnread}
+          initialHasNotificationUnread={notificationsUnread.hasUnread}
+        />
 
         <main className="planner-content">{children}</main>
 

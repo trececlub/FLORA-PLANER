@@ -29,6 +29,7 @@ const categoryOptions: Array<{ value: GalleryCategory; label: string }> = [
   { value: "Packaging", label: "Packaging" },
   { value: "Interior", label: "Interior" },
   { value: "Redes", label: "Redes" },
+  { value: "IdeaCliente", label: "Ideas del cliente" },
   { value: "Otro", label: "Otro" },
 ];
 
@@ -67,9 +68,11 @@ export default async function GalleryPage({ searchParams }: PageProps) {
   const selectedCategory = strParam(params.category);
   const selectedStage = strParam(params.stage);
   const selectedStatus = strParam(params.status);
+  const onlyClientIdeas = strParam(params.onlyClientIdeas) === "1";
   const snapshot = await getPlannerSnapshot();
 
   const filteredEntries = snapshot.galleryEntries
+    .filter((entry) => !onlyClientIdeas || entry.category === "IdeaCliente")
     .filter((entry) => !selectedCategory || entry.category === selectedCategory)
     .filter((entry) => !selectedStage || entry.stage === selectedStage)
     .filter((entry) => !selectedStatus || entry.status === selectedStatus)
@@ -189,6 +192,10 @@ export default async function GalleryPage({ searchParams }: PageProps) {
                 </option>
               ))}
             </select>
+          </label>
+          <label className="checkbox-line">
+            <input name="onlyClientIdeas" type="checkbox" value="1" defaultChecked={onlyClientIdeas} />
+            Solo ideas del cliente
           </label>
           <label>
             Etapa

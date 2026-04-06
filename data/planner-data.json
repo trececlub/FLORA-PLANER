@@ -5,6 +5,7 @@
       "name": "Admin FLORA",
       "email": "admin@floraplaner.local",
       "password": "flora123",
+      "mustChangePassword": false,
       "role": "CEO",
       "status": "Active",
       "jobTitle": "Direccion de proyecto",
@@ -208,6 +209,21 @@
       "createdByUserId": "user_owner",
       "createdAt": "2026-04-06T16:26:00.000Z",
       "updatedAt": "2026-04-06T16:26:00.000Z"
+    },
+    {
+      "id": "gallery_client_idea_1",
+      "title": "Idea cliente para mural interior",
+      "pieceKey": "idea_mural_interior",
+      "version": "v1",
+      "category": "IdeaCliente",
+      "stage": "Investigacion",
+      "status": "Pending",
+      "description": "Inspiracion en patios coloniales de Cartagena con vegetacion abundante.",
+      "imageUrl": "https://images.unsplash.com/photo-1445116572660-236099ec97a0?auto=format&fit=crop&w=1200&q=80",
+      "responsibleUserId": "user_owner",
+      "createdByUserId": "user_owner",
+      "createdAt": "2026-04-06T16:29:00.000Z",
+      "updatedAt": "2026-04-06T16:29:00.000Z"
     }
   ],
   "galleryComments": [
@@ -225,5 +241,6 @@
       "text": "Probar una variante con mayor presencia del origen Cartagena.",
       "createdAt": "2026-04-06T16:28:00.000Z"
     }
-  ]
+  ],
+  "notifications": []
 }

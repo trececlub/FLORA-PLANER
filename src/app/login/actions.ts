@@ -22,5 +22,8 @@ export async function loginAction(formData: FormData) {
   }
 
   await createSession(user, { rememberMe });
+  if (user.mustChangePassword) {
+    redirect("/profile?forcePassword=1");
+  }
   redirect(nextPath);
 }

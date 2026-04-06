@@ -18,6 +18,7 @@ export default async function ProfilePage({ searchParams }: PageProps) {
   const params = await searchParams;
   const saved = strParam(params.saved);
   const error = strParam(params.error);
+  const forcePassword = strParam(params.forcePassword) === "1";
   const initials = user.name
     .split(" ")
     .map((part) => part[0] || "")
@@ -31,6 +32,11 @@ export default async function ProfilePage({ searchParams }: PageProps) {
       description="Ajusta tus datos personales para acceso y notificaciones del equipo."
     >
       <SaveMessage saved={saved} error={error} />
+      {forcePassword ? (
+        <p className="alert alert-error">
+          Debes actualizar tu contraseña antes de continuar navegando.
+        </p>
+      ) : null}
 
       <SectionCard title="Resumen de cuenta" subtitle="Vista rapida de tus datos actuales.">
         <article className="profile-identity-card">
@@ -90,8 +96,13 @@ export default async function ProfilePage({ searchParams }: PageProps) {
             <textarea name="bio" rows={3} defaultValue={user.bio} placeholder="Resumen del rol y responsabilidades." />
           </label>
           <label>
-            Nueva clave (opcional)
-            <input name="password" type="text" placeholder="Deja vacio para mantener" />
+            {forcePassword ? "Nueva clave (obligatoria)" : "Nueva clave (opcional)"}
+            <input
+              name="password"
+              type="password"
+              placeholder={forcePassword ? "Ingresa tu nueva clave para continuar" : "Deja vacio para mantener"}
+              required={forcePassword}
+            />
           </label>
 
           <button className="btn btn-primary" type="submit">

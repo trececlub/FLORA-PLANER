@@ -12,6 +12,7 @@ export type PlannerUser = {
   name: string;
   email: string;
   password: string;
+  mustChangePassword: boolean;
   role: PlannerRole;
   status: UserStatus;
   jobTitle: string;
@@ -174,6 +175,7 @@ export type GalleryCategory =
   | "Packaging"
   | "Interior"
   | "Redes"
+  | "IdeaCliente"
   | "Otro";
 export type GalleryStage =
   | "Investigacion"
@@ -207,6 +209,19 @@ export type GalleryComment = {
   createdAt: string;
 };
 
+export type NotificationKind = "TaskAssigned" | "General";
+
+export type UserNotification = {
+  id: string;
+  userId: string;
+  kind: NotificationKind;
+  title: string;
+  description: string;
+  linkPath: string;
+  createdAt: string;
+  readAt?: string;
+};
+
 export type PlannerData = {
   users: PlannerUser[];
   projects: Project[];
@@ -223,6 +238,7 @@ export type PlannerData = {
   userPresence: UserPresence[];
   galleryEntries: GalleryEntry[];
   galleryComments: GalleryComment[];
+  notifications: UserNotification[];
 };
 
 const DATA_DIR = path.join(process.cwd(), "data");
@@ -474,6 +490,7 @@ function getDefaultCeo(): PlannerUser {
     name: "Admin FLORA",
     email,
     password,
+    mustChangePassword: false,
     role: "CEO",
     status: "Active",
     jobTitle: "Administrador del proyecto",
@@ -509,6 +526,7 @@ const initialData: PlannerData = {
   userPresence: [],
   galleryEntries: [],
   galleryComments: [],
+  notifications: [],
 };
 
 function cloneInitialData(): PlannerData {
@@ -578,6 +596,12 @@ function normalizeUsers(rawUsers: unknown) {
         name: String(user.name || defaultName).trim() || defaultName,
         email: String(user.email || `${role.toLowerCase()}${index + 1}@floraplaner.local`).trim().toLowerCase(),
         password: String(user.password || "flora123"),
+        mustChangePassword:
+          typeof user.mustChangePassword === "boolean"
+            ? user.mustChangePassword
+            : role === "CEO"
+              ? false
+              : true,
         role,
         status: normalizeUserStatus(user.status),
         jobTitle: String(user.jobTitle || defaultTitle).trim(),
@@ -600,6 +624,7 @@ function normalizeUsers(rawUsers: unknown) {
     {
       ...primaryManager,
       id: "user_owner",
+      mustChangePassword: false,
       role: "CEO" as const,
       status: "Active" as const,
     },
@@ -889,6 +914,7 @@ function normalizeGalleryCategory(value: unknown): GalleryCategory {
   if (value === "Packaging") return "Packaging";
   if (value === "Interior") return "Interior";
   if (value === "Redes") return "Redes";
+  if (value === "IdeaCliente") return "IdeaCliente";
   return "Otro";
 }
 
@@ -972,6 +998,49 @@ function normalizeGalleryComments(
     .filter((comment): comment is GalleryComment => Boolean(comment));
 
   return normalized.sort((a, b) => toTimestamp(a.createdAt) - toTimestamp(b.createdAt));
+}
+
+function normalizeNotificationKind(value: unknown): NotificationKind {
+  if (value === "TaskAssigned") return "TaskAssigned";
+  return "General";
+}
+
+function normalizeNotifications(rawNotifications: unknown, users: PlannerUser[]): UserNotification[] {
+  const notifications = Array.isArray(rawNotifications) ? rawNotifications : [];
+  const validUserIds = new Set(users.map((user) => user.id));
+
+  const normalized = notifications
+    .map((item, index) => {
+      if (!item || typeof item !== "object") return null;
+      const notification = item as Partial<UserNotification>;
+      const userId = String(notification.userId || "").trim();
+      if (!validUserIds.has(userId)) return null;
+
+      const createdAt = String(notification.createdAt || nowIso());
+      const readAtRaw = String(notification.readAt || "").trim();
+      const readAt = readAtRaw ? readAtRaw : undefined;
+
+      return {
+        id: String(notification.id || `notification_${index + 1}`),
+        userId,
+        kind: normalizeNotificationKind(notification.kind),
+        title: String(notification.title || "Notificacion").trim() || "Notificacion",
+        description: String(notification.description || "").trim(),
+        linkPath: normalizePathLike(notification.linkPath, "/dashboard"),
+        createdAt,
+        ...(readAt ? { readAt } : {}),
+      } satisfies UserNotification;
+    })
+    .filter(Boolean) as UserNotification[];
+
+  return normalized.sort((a, b) => toTimestamp(b.createdAt) - toTimestamp(a.createdAt));
+}
+
+function normalizePathLike(value: unknown, fallback: string) {
+  const pathValue = String(value || "").trim();
+  if (!pathValue.startsWith("/")) return fallback;
+  if (pathValue.startsWith("//")) return fallback;
+  return pathValue;
 }
 
 function getGroupChatThread(data: PlannerData) {
@@ -1067,6 +1136,12 @@ function getUnreadThreadIdsForUser(data: PlannerData, userId: string) {
   return unread;
 }
 
+function getUnreadNotificationsForUser(data: PlannerData, userId: string) {
+  return data.notifications.filter(
+    (notification) => notification.userId === userId && !notification.readAt,
+  );
+}
+
 function normalizeData(parsed: Partial<PlannerData>): PlannerData {
   const projects = normalizeProjects(parsed.projects);
   const tasks = normalizeTasks(parsed.tasks, projects);
@@ -1091,6 +1166,10 @@ function normalizeData(parsed: Partial<PlannerData>): PlannerData {
     galleryEntries,
     users,
   );
+  const notifications = normalizeNotifications(
+    (parsed as { notifications?: unknown }).notifications,
+    users,
+  );
 
   const normalized = {
     users,
@@ -1108,6 +1187,7 @@ function normalizeData(parsed: Partial<PlannerData>): PlannerData {
     userPresence,
     galleryEntries,
     galleryComments,
+    notifications,
   } satisfies PlannerData;
 
   const validProjectIds = new Set(
@@ -1150,6 +1230,56 @@ export async function getChatUnreadSummary(userId: string) {
     unreadCount: unreadThreadIds.length,
     unreadThreadIds,
   };
+}
+
+export async function getNotificationUnreadSummary(userId: string) {
+  const data = await readPlannerData();
+  const user = data.users.find((item) => item.id === userId && item.status === "Active");
+  if (!user) {
+    return {
+      hasUnread: false,
+      unreadCount: 0,
+    };
+  }
+
+  const unread = getUnreadNotificationsForUser(data, userId);
+  return {
+    hasUnread: unread.length > 0,
+    unreadCount: unread.length,
+  };
+}
+
+export async function getUserNotifications(userId: string) {
+  const data = await readPlannerData();
+  const user = data.users.find((item) => item.id === userId && item.status === "Active");
+  if (!user) return [] as UserNotification[];
+
+  return data.notifications
+    .filter((notification) => notification.userId === userId)
+    .sort((a, b) => toTimestamp(b.createdAt) - toTimestamp(a.createdAt));
+}
+
+export async function markAllNotificationsAsRead(userId: string) {
+  const data = await readPlannerData();
+  const user = data.users.find((item) => item.id === userId && item.status === "Active");
+  if (!user) return { ok: false as const, error: "forbidden" as const };
+
+  let changed = false;
+  const readAt = nowIso();
+  data.notifications = data.notifications.map((notification) => {
+    if (notification.userId !== userId || notification.readAt) return notification;
+    changed = true;
+    return {
+      ...notification,
+      readAt,
+    };
+  });
+
+  if (changed) {
+    await writePlannerData(data);
+  }
+
+  return { ok: true as const, changed };
 }
 
 export async function markChatThreadAsRead(input: {
@@ -1469,6 +1599,7 @@ export async function validateUserCredentials(email: string, password: string) {
         password: fallbackPassword,
         role: "CEO",
         status: "Active",
+        mustChangePassword: false,
         jobTitle: configuredAdmin.jobTitle,
         phone: configuredAdmin.phone,
         bio: configuredAdmin.bio,
@@ -1480,6 +1611,7 @@ export async function validateUserCredentials(email: string, password: string) {
         id: "user_owner",
         role: "CEO",
         status: "Active",
+        mustChangePassword: false,
         password: fallbackPassword,
       });
     }
@@ -1490,6 +1622,7 @@ export async function validateUserCredentials(email: string, password: string) {
       id: "user_owner",
       role: "CEO",
       status: "Active",
+      mustChangePassword: false,
       password: fallbackPassword,
     } satisfies PlannerUser;
   }
@@ -1519,6 +1652,7 @@ export async function validateUserCredentials(email: string, password: string) {
         process.env.FLORA_PLANER_ADMIN_PASSWORD ||
         process.env.FLORA_PLANNER_ADMIN_PASSWORD ||
         "flora123",
+      mustChangePassword: false,
       role: "CEO",
       status: "Active",
       jobTitle: "Administrador del proyecto",
@@ -1546,6 +1680,7 @@ export async function validateUserCredentials(email: string, password: string) {
       name: matchedFallback.name,
       email: matchedFallback.email,
       password: fallbackPassword,
+      mustChangePassword: matchedFallback.mustChangePassword,
       role: matchedFallback.role,
       status: "Active",
       jobTitle: matchedFallback.jobTitle,
@@ -1655,6 +1790,7 @@ export async function createTask(input: {
   status: TaskStatus;
   priority: TaskPriority;
   assigneeId: string;
+  createdByUserId: string;
   dueDate: string;
 }) {
   const data = await readPlannerData();
@@ -1681,6 +1817,20 @@ export async function createTask(input: {
   };
 
   data.tasks.unshift(task);
+
+  const assignee = data.users.find((user) => user.id === task.assigneeId && user.status === "Active");
+  if (assignee) {
+    data.notifications.unshift({
+      id: randomUUID(),
+      userId: assignee.id,
+      kind: "TaskAssigned",
+      title: "Nueva tarea asignada",
+      description: `${task.title} · entrega ${task.dueDate || "sin fecha"}`,
+      linkPath: "/tasks",
+      createdAt,
+    });
+  }
+
   syncProjectProgressFromTasks(data, input.projectId);
   await writePlannerData(data);
   return task;
@@ -2192,6 +2342,7 @@ export async function createUser(input: {
     name: input.name.trim(),
     email,
     password: await hashPassword(input.password),
+    mustChangePassword: true,
     role: "Member",
     status: "Active",
     jobTitle: input.jobTitle.trim() || "Team Member",
@@ -2253,6 +2404,7 @@ export async function updateUserByManager(input: {
     password: input.password.trim()
       ? await hashPassword(input.password.trim())
       : target.password,
+    mustChangePassword: input.password.trim() ? true : target.mustChangePassword,
     jobTitle: input.jobTitle.trim() || target.jobTitle,
     phone: input.phone.trim(),
     bio: input.bio.trim(),
@@ -2342,6 +2494,8 @@ export async function deleteUser(input: {
     comment.userId === target.id ? { ...comment, userId: input.actorId } : comment,
   );
 
+  data.notifications = data.notifications.filter((notification) => notification.userId !== target.id);
+
   data.chatThreads = data.chatThreads
     .map((thread) => ({
       ...thread,
@@ -2369,6 +2523,7 @@ export async function updateOwnProfile(input: {
   name: string;
   email: string;
   password: string;
+  requirePasswordChange?: boolean;
   jobTitle: string;
   phone: string;
   bio: string;
@@ -2387,14 +2542,20 @@ export async function updateOwnProfile(input: {
     return { ok: false as const, error: "email_exists" };
   }
 
+  const passwordInput = input.password.trim();
+  if (input.requirePasswordChange && !passwordInput) {
+    return { ok: false as const, error: "password_required" };
+  }
+
   const current = data.users[index];
   data.users[index] = {
     ...current,
     name: input.name.trim() || current.name,
     email,
-    password: input.password.trim()
-      ? await hashPassword(input.password.trim())
+    password: passwordInput
+      ? await hashPassword(passwordInput)
       : current.password,
+    mustChangePassword: passwordInput ? false : current.mustChangePassword,
     jobTitle: input.jobTitle.trim() || current.jobTitle,
     phone: input.phone.trim(),
     bio: input.bio.trim(),

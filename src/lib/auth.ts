@@ -24,6 +24,7 @@ export async function createSession(
   const sessionToken = createSessionToken({
     userId: user.id,
     role: user.role,
+    mustChangePassword: user.mustChangePassword,
     rememberMe,
   });
   if (!sessionToken) {
