@@ -1,22 +1,22 @@
 <svg width="360" height="92" viewBox="0 0 360 92" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="petal" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#C76F47"/>
-      <stop offset="1" stop-color="#8F3F24"/>
+      <stop offset="0" stop-color="#58AE75"/>
+      <stop offset="1" stop-color="#2D8A57"/>
     </linearGradient>
     <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#4C7C4C"/>
-      <stop offset="1" stop-color="#2E5A35"/>
+      <stop offset="0" stop-color="#3D8B5B"/>
+      <stop offset="1" stop-color="#1F5D3B"/>
     </linearGradient>
   </defs>
   <g transform="translate(12 13)">
-    <circle cx="28" cy="28" r="20" fill="#F6E7D6"/>
+    <circle cx="28" cy="28" r="20" fill="#E7F4EA"/>
     <path d="M28 8C34 14 34 24 28 28C22 24 22 14 28 8Z" fill="url(#petal)"/>
     <path d="M48 28C42 34 32 34 28 28C32 22 42 22 48 28Z" fill="url(#petal)"/>
     <path d="M28 48C22 42 22 32 28 28C34 32 34 42 28 48Z" fill="url(#petal)"/>
     <path d="M8 28C14 22 24 22 28 28C24 34 14 34 8 28Z" fill="url(#petal)"/>
     <path d="M28 28C31.866 28 35 31.134 35 35C31.134 35 28 31.866 28 28Z" fill="url(#leaf)"/>
   </g>
-  <text x="86" y="39" fill="#3A261D" font-size="30" font-family="Georgia, 'Times New Roman', serif" font-weight="700" letter-spacing="1.8">FLORA</text>
-  <text x="88" y="63" fill="#7A6253" font-size="13" font-family="'Trebuchet MS', Arial, sans-serif" font-weight="600" letter-spacing="2.4">PLANER</text>
+  <text x="86" y="39" fill="#1D4C32" font-size="30" font-family="Georgia, 'Times New Roman', serif" font-weight="700" letter-spacing="1.8">FLORA</text>
+  <text x="88" y="63" fill="#4A7B5E" font-size="13" font-family="'Trebuchet MS', Arial, sans-serif" font-weight="600" letter-spacing="2.4">PLANER</text>
 </svg>
