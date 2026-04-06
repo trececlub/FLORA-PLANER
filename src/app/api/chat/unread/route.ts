@@ -1,6 +1,8 @@
 import { getSessionUser } from "@/lib/auth";
 import { getChatUnreadSummary } from "@/lib/data-store";
 
+export const preferredRegion = "iad1";
+
 export async function GET() {
   const user = await getSessionUser();
   if (!user) {

@@ -27,6 +27,9 @@ export const metadata: Metadata = {
   },
 };
 
+// Keep app reads/writes in a single region to reduce cross-region stale reads.
+export const preferredRegion = "iad1";
+
 export default function RootLayout({
   children,
 }: Readonly<{

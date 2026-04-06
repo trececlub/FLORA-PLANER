@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createSession, loginWithCredentials } from "@/lib/auth";
 
+export const preferredRegion = "iad1";
+
 function safeNext(pathname: FormDataEntryValue | null) {
   const value = String(pathname || "").trim();
   if (!value.startsWith("/")) return "/dashboard";

@@ -1,6 +1,8 @@
 import { getSessionUser } from "@/lib/auth";
 import { recordUserPresence } from "@/lib/data-store";
 
+export const preferredRegion = "iad1";
+
 export async function POST() {
   const user = await getSessionUser();
   if (!user) {
