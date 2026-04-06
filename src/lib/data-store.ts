@@ -1554,6 +1554,12 @@ export async function markChatThreadAsRead(input: {
 const PRESENCE_WRITE_MIN_INTERVAL_MS = 20 * 1000;
 
 export async function recordUserPresence(input: { userId: string; seenAt?: string }) {
+  // In Postgres deployments we avoid persisting presence into the main JSON payload.
+  // Presence heartbeats are frequent and can overwrite concurrent content edits.
+  if (hasPostgresConfig()) {
+    return { ok: true as const, changed: false };
+  }
+
   const data = await readPlannerData();
   const user = data.users.find((item) => item.id === input.userId && item.status === "Active");
   if (!user) return { ok: false as const, error: "forbidden" as const };
