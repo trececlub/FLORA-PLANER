@@ -1,12 +1,15 @@
 import {
   addGalleryCommentAction,
   createGalleryEntryAction,
+  deleteGalleryEntryAction,
   updateGalleryWorkflowAction,
 } from "@/app/(planner)/actions";
+import { DeleteConfirmForm } from "@/components/delete-confirm-form";
 import { PlannerPage, SaveMessage } from "@/components/planner-page";
 import { Badge, EmptyState, SectionCard } from "@/components/ui";
 import { requireSessionUser } from "@/lib/auth";
 import {
+  canManageUsers,
   getPlannerSnapshot,
   type GalleryCategory,
   type GalleryStage,
@@ -233,6 +236,8 @@ export default async function GalleryPage({ searchParams }: PageProps) {
             {filteredEntries.map((entry) => {
               const owner = snapshot.userMap[entry.responsibleUserId];
               const comments = commentsByEntry.get(entry.id) || [];
+              const canDeleteEntry =
+                entry.createdByUserId === currentUser.id || canManageUsers(currentUser.role);
 
               return (
                 <article key={entry.id} className="gallery-card">
@@ -286,6 +291,20 @@ export default async function GalleryPage({ searchParams }: PageProps) {
                         Actualizar
                       </button>
                     </form>
+
+                    {canDeleteEntry ? (
+                      <DeleteConfirmForm
+                        action={deleteGalleryEntryAction}
+                        hiddenInputs={[
+                          { name: "entryId", value: entry.id },
+                          { name: "returnTo", value: "/gallery" },
+                        ]}
+                        triggerLabel="Eliminar pieza"
+                        title="Eliminar pieza"
+                        description="Se eliminara esta pieza de la galeria."
+                        impact="Solo quien la subio o la cuenta admin puede eliminarla."
+                      />
+                    ) : null}
 
                     <div className="gallery-comments">
                       {comments.length === 0 ? (

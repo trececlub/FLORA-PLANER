@@ -2535,6 +2535,32 @@ export async function addGalleryEntryComment(input: {
   return { ok: true as const, comment };
 }
 
+export async function deleteGalleryEntry(input: {
+  entryId: string;
+  actorId: string;
+  actorRole: PlannerRole;
+}) {
+  const data = await readPlannerData();
+  const index = data.galleryEntries.findIndex((entry) => entry.id === input.entryId);
+  if (index === -1) {
+    return { ok: false as const, error: "not_found" as const };
+  }
+
+  const target = data.galleryEntries[index];
+  const canDelete =
+    target.createdByUserId === input.actorId || canManageUsers(input.actorRole);
+  if (!canDelete) {
+    return { ok: false as const, error: "not_uploader" as const };
+  }
+
+  data.galleryEntries.splice(index, 1);
+  data.galleryComments = data.galleryComments.filter(
+    (comment) => comment.entryId !== target.id,
+  );
+  await writePlannerData(data);
+  return { ok: true as const };
+}
+
 export async function createUser(input: {
   name: string;
   email: string;

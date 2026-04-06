@@ -9,6 +9,7 @@ import { clearSession, createSession, requireSessionUser } from "@/lib/auth";
 import {
   addGalleryEntryComment,
   createGalleryEntry,
+  deleteGalleryEntry,
   createDecision,
   createDoc,
   createGoal,
@@ -578,6 +579,23 @@ export async function addGalleryCommentAction(formData: FormData) {
 
   revalidatePlannerViews();
   redirectWithResult(returnTo, "gallery_comment", result.ok ? undefined : result.error);
+}
+
+export async function deleteGalleryEntryAction(formData: FormData) {
+  const user = await requireSessionUser();
+  const returnTo = normalizePath(formData.get("returnTo"), "/gallery");
+  if (!hasDeleteConfirmation(formData)) {
+    redirectWithResult(returnTo, "gallery_deleted", "confirm_required");
+  }
+
+  const result = await deleteGalleryEntry({
+    entryId: String(formData.get("entryId") || "").trim(),
+    actorId: user.id,
+    actorRole: user.role,
+  });
+
+  revalidatePlannerViews();
+  redirectWithResult(returnTo, "gallery_deleted", result.ok ? undefined : result.error);
 }
 
 export async function createUserAction(formData: FormData) {
