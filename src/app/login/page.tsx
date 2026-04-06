@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { getSessionUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { loginAction } from "@/app/login/actions";
 
 type LoginPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -41,7 +40,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           <p className="alert alert-error">Credenciales invalidas. Revisa email y clave.</p>
         ) : null}
 
-        <form action={loginAction} className="auth-form">
+        <form action="/api/login" method="post" className="auth-form">
           <input type="hidden" name="next" value={nextParam} />
 
           <label>
