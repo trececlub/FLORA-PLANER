@@ -2,7 +2,6 @@ import type { PropsWithChildren } from "react";
 
 export function PlannerPage({
   title,
-  description,
   className,
   children,
 }: PropsWithChildren<{ title: string; description: string; className?: string }>) {
@@ -10,7 +9,6 @@ export function PlannerPage({
     <div className={`planner-page${className ? ` ${className}` : ""}`}>
       <header className="page-head">
         <h1>{title}</h1>
-        <p>{description}</p>
       </header>
       {children}
     </div>

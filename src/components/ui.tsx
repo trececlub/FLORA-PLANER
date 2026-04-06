@@ -28,7 +28,6 @@ export function MetricCard({
 
 export function SectionCard({
   title,
-  subtitle,
   action,
   className,
   children,
@@ -38,7 +37,6 @@ export function SectionCard({
       <header className="section-head">
         <div>
           <h2>{title}</h2>
-          {subtitle ? <p>{subtitle}</p> : null}
         </div>
         {action ? <div>{action}</div> : null}
       </header>
@@ -58,7 +56,6 @@ export function ProgressBar({ value }: { value: number }) {
 
 export function EmptyState({
   title,
-  detail,
 }: {
   title: string;
   detail: string;
@@ -66,7 +63,6 @@ export function EmptyState({
   return (
     <div className="empty-state">
       <p className="empty-title">{title}</p>
-      <p className="empty-detail">{detail}</p>
     </div>
   );
 }
