@@ -1990,12 +1990,18 @@ export async function updateProjectProgress(input: {
   return data.projects[index];
 }
 
-export async function deleteProject(input: { projectId: string; actorId: string }) {
+export async function deleteProject(input: {
+  projectId: string;
+  actorId: string;
+  actorRole: PlannerRole;
+}) {
   const data = await readPlannerData();
   const projectIndex = data.projects.findIndex((project) => project.id === input.projectId);
   if (projectIndex === -1) return { ok: false as const, error: "not_found" };
   const project = data.projects[projectIndex];
-  if (project.createdByUserId !== input.actorId) {
+  const canDelete =
+    project.createdByUserId === input.actorId || canManageUsers(input.actorRole);
+  if (!canDelete) {
     return { ok: false as const, error: "not_creator" };
   }
 

@@ -29,7 +29,7 @@ export function SaveMessage({
       error === "forbidden"
         ? "Tu rol no tiene permiso para esta accion."
         : error === "not_creator"
-          ? "Solo quien creo el proyecto puede eliminarlo."
+          ? "Solo quien creo el proyecto o la cuenta admin puede eliminarlo."
         : error === "not_uploader"
           ? "Solo quien subio la pieza o la cuenta admin puede eliminarla."
           : error === "email_exists"

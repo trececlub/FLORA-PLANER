@@ -274,6 +274,7 @@ export async function deleteProjectAction(formData: FormData) {
   const result = await deleteProject({
     projectId: String(formData.get("projectId") || "").trim(),
     actorId: user.id,
+    actorRole: user.role,
   });
   revalidatePlannerViews();
 

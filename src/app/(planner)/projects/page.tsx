@@ -7,7 +7,7 @@ import { DeleteConfirmForm } from "@/components/delete-confirm-form";
 import { PlannerPage, SaveMessage } from "@/components/planner-page";
 import { Badge, EmptyState, ProgressBar, SectionCard } from "@/components/ui";
 import { requireSessionUser } from "@/lib/auth";
-import { getPlannerSnapshot } from "@/lib/data-store";
+import { canManageUsers, getPlannerSnapshot } from "@/lib/data-store";
 import {
   dateFormat,
   projectPriorityLabel,
@@ -162,7 +162,7 @@ export default async function ProjectsPage({ searchParams }: PageProps) {
                 </form>
                 <p className="list-subtitle">Avance calculado automaticamente segun tareas completadas.</p>
 
-                {project.createdByUserId === currentUser.id ? (
+                {project.createdByUserId === currentUser.id || canManageUsers(currentUser.role) ? (
                   <DeleteConfirmForm
                     action={deleteProjectAction}
                     hiddenInputs={[
@@ -175,7 +175,7 @@ export default async function ProjectsPage({ searchParams }: PageProps) {
                     impact="Se eliminaran tambien todas sus tareas asociadas."
                   />
                 ) : (
-                  <p className="list-subtitle">Solo el creador del proyecto puede eliminarlo.</p>
+                  <p className="list-subtitle">Solo el creador o la cuenta admin puede eliminarlo.</p>
                 )}
               </article>
             ))}
