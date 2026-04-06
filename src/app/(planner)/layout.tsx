@@ -4,10 +4,15 @@ import { requireSessionUser } from "@/lib/auth";
 import { PlannerMobileTabs, PlannerSidebarNav } from "@/components/planner-nav";
 import { PresenceHeartbeat } from "@/components/presence-heartbeat";
 import { logoutAction } from "@/app/(planner)/actions";
-import { getChatUnreadSummary, getNotificationUnreadSummary } from "@/lib/data-store";
+import {
+  getChatUnreadSummary,
+  getNotificationUnreadSummary,
+  getPermissionsForUser,
+} from "@/lib/data-store";
 
 export default async function PlannerLayout({ children }: { children: ReactNode }) {
   const user = await requireSessionUser();
+  const permissions = getPermissionsForUser(user);
   const chatUnread = await getChatUnreadSummary(user.id);
   const notificationsUnread = await getNotificationUnreadSummary(user.id);
   const initials = user.name
@@ -35,7 +40,7 @@ export default async function PlannerLayout({ children }: { children: ReactNode 
         </div>
 
         <PlannerSidebarNav
-          role={user.role}
+          permissions={permissions}
           initialHasChatUnread={chatUnread.hasUnread}
           initialHasNotificationUnread={notificationsUnread.hasUnread}
         />
@@ -87,7 +92,7 @@ export default async function PlannerLayout({ children }: { children: ReactNode 
         </header>
 
         <PlannerMobileTabs
-          role={user.role}
+          permissions={permissions}
           initialHasChatUnread={chatUnread.hasUnread}
           initialHasNotificationUnread={notificationsUnread.hasUnread}
         />

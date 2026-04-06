@@ -7,7 +7,13 @@ import { DeleteConfirmForm } from "@/components/delete-confirm-form";
 import { PlannerPage, SaveMessage } from "@/components/planner-page";
 import { Badge, EmptyState, SectionCard } from "@/components/ui";
 import { requireSessionUser } from "@/lib/auth";
-import { canManageUsers, getPlannerSnapshot, isProtectedRole } from "@/lib/data-store";
+import {
+  canManageUsers,
+  getPlannerSnapshot,
+  isProtectedRole,
+  projectRoleLabel,
+  projectRoles,
+} from "@/lib/data-store";
 import { dateFormat, roleLabel, toneForRole } from "@/lib/planner-view";
 import { redirect } from "next/navigation";
 
@@ -56,6 +62,16 @@ export default async function UsersPage({ searchParams }: PageProps) {
               <input type="text" name="password" required defaultValue="flora123" />
             </label>
             <label>
+              Rol del proyecto
+              <select name="projectRole" defaultValue="Observer">
+                {projectRoles.map((projectRole) => (
+                  <option key={projectRole} value={projectRole}>
+                    {projectRoleLabel[projectRole]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
               Cargo
               <input name="jobTitle" placeholder="Ej: Ejecutiva comercial" />
             </label>
@@ -72,7 +88,7 @@ export default async function UsersPage({ searchParams }: PageProps) {
               <textarea name="bio" rows={3} placeholder="Contexto interno del miembro." />
             </label>
             <button className="btn btn-primary" type="submit">
-              Crear miembro
+              Crear usuario
             </button>
           </form>
         </details>
@@ -110,7 +126,9 @@ export default async function UsersPage({ searchParams }: PageProps) {
                     </div>
                     <div className="badge-row">
                       <Badge tone={toneForRole(user.role)}>{roleLabel[user.role]}</Badge>
+                      <Badge tone="accent">{projectRoleLabel[user.projectRole]}</Badge>
                       <Badge tone={user.status === "Active" ? "ok" : "critical"}>{user.status}</Badge>
+                      {user.mustChangePassword ? <Badge tone="warning">Debe cambiar clave</Badge> : null}
                       {protectedAccount ? <Badge tone="warning">Protegido</Badge> : null}
                     </div>
                   </div>
@@ -132,6 +150,16 @@ export default async function UsersPage({ searchParams }: PageProps) {
                         <label>
                           Email
                           <input name="email" type="email" defaultValue={user.email} required />
+                        </label>
+                        <label>
+                          Rol del proyecto
+                          <select name="projectRole" defaultValue={user.projectRole}>
+                            {projectRoles.map((projectRole) => (
+                              <option key={projectRole} value={projectRole}>
+                                {projectRoleLabel[projectRole]}
+                              </option>
+                            ))}
+                          </select>
                         </label>
                         <label>
                           Cargo

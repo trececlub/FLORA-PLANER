@@ -29,7 +29,7 @@ export function SaveMessage({
   if (error) {
     const message =
       error === "forbidden"
-        ? "Solo la cuenta administradora tiene permiso para esta accion."
+        ? "Tu rol no tiene permiso para esta accion."
         : error === "not_creator"
           ? "Solo quien creo el proyecto puede eliminarlo."
         : error === "email_exists"

@@ -2,6 +2,7 @@ import { updateProfileAction } from "@/app/(planner)/actions";
 import { PlannerPage, SaveMessage } from "@/components/planner-page";
 import { SectionCard } from "@/components/ui";
 import { requireSessionUser } from "@/lib/auth";
+import { projectRoleLabel } from "@/lib/data-store";
 import { dateFormat, roleLabel } from "@/lib/planner-view";
 
 type PageProps = {
@@ -52,6 +53,7 @@ export default async function ProfilePage({ searchParams }: PageProps) {
             <p className="list-subtitle">{user.jobTitle || "Sin cargo definido"}</p>
             <p className="list-subtitle">{user.email}</p>
             <p className="list-subtitle">Rol: {roleLabel[user.role]}</p>
+            <p className="list-subtitle">Rol de proyecto: {projectRoleLabel[user.projectRole]}</p>
             <p className="list-subtitle">Telefono: {user.phone || "Sin telefono"}</p>
             <p className="list-subtitle">Creado: {dateFormat(user.createdAt)}</p>
             <p className="list-subtitle">{user.bio || "Sin biografia cargada."}</p>
@@ -66,6 +68,10 @@ export default async function ProfilePage({ searchParams }: PageProps) {
           <label>
             Rol
             <input value={roleLabel[user.role]} readOnly disabled />
+          </label>
+          <label>
+            Rol de proyecto
+            <input value={projectRoleLabel[user.projectRole]} readOnly disabled />
           </label>
           <label>
             Nombre

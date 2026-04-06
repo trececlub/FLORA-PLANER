@@ -18,6 +18,7 @@ import {
   createTask,
   createUser,
   markAllNotificationsAsRead,
+  getPermissionsForUser,
   sendChatMessage,
   deleteAllWeeklyReviews,
   deleteDecision,
@@ -42,6 +43,7 @@ import {
   type MeetingKind,
   type MeetingStatus,
   type PlannerRole,
+  type ProjectRole,
   type ProcessStepStatus,
   type ProjectPriority,
   type ProjectStatus,
@@ -204,6 +206,12 @@ function hasDeleteConfirmation(formData: FormData) {
   return String(formData.get("confirmDelete") || "").trim() === "on";
 }
 
+function assertPermission(allowed: boolean, returnTo: string) {
+  if (!allowed) {
+    redirectWithResult(returnTo, "permission", "forbidden");
+  }
+}
+
 export async function logoutAction() {
   await clearSession();
   redirect("/login");
@@ -212,6 +220,8 @@ export async function logoutAction() {
 export async function createProjectAction(formData: FormData) {
   const user = await requireSessionUser();
   const returnTo = normalizePath(formData.get("returnTo"), "/projects");
+  const permissions = getPermissionsForUser(user);
+  assertPermission(permissions.canManageProjects, returnTo);
 
   await createProject({
     name: String(formData.get("name") || "").trim(),
@@ -237,8 +247,10 @@ export async function createProjectAction(formData: FormData) {
 }
 
 export async function updateProjectProgressAction(formData: FormData) {
-  await requireSessionUser();
+  const user = await requireSessionUser();
   const returnTo = normalizePath(formData.get("returnTo"), "/projects");
+  const permissions = getPermissionsForUser(user);
+  assertPermission(permissions.canManageProjects, returnTo);
 
   await updateProjectProgress({
     projectId: String(formData.get("projectId") || "").trim(),
@@ -252,6 +264,8 @@ export async function updateProjectProgressAction(formData: FormData) {
 export async function deleteProjectAction(formData: FormData) {
   const user = await requireSessionUser();
   const returnTo = normalizePath(formData.get("returnTo"), "/projects");
+  const permissions = getPermissionsForUser(user);
+  assertPermission(permissions.canManageProjects, returnTo);
   if (!hasDeleteConfirmation(formData)) {
     redirectWithResult(returnTo, "project_deleted", "confirm_required");
   }
@@ -268,6 +282,8 @@ export async function deleteProjectAction(formData: FormData) {
 export async function createTaskAction(formData: FormData) {
   const user = await requireSessionUser();
   const returnTo = normalizePath(formData.get("returnTo"), "/tasks");
+  const permissions = getPermissionsForUser(user);
+  assertPermission(permissions.canManageTasks, returnTo);
   const { projectId, stageId } = parseProjectStage(formData.get("projectStage"));
 
   await createTask({
@@ -287,8 +303,10 @@ export async function createTaskAction(formData: FormData) {
 }
 
 export async function updateTaskStatusAction(formData: FormData) {
-  await requireSessionUser();
+  const user = await requireSessionUser();
   const returnTo = normalizePath(formData.get("returnTo"), "/tasks");
+  const permissions = getPermissionsForUser(user);
+  assertPermission(permissions.canManageTasks, returnTo);
 
   await updateTaskStatus({
     taskId: String(formData.get("taskId") || "").trim(),
@@ -300,8 +318,10 @@ export async function updateTaskStatusAction(formData: FormData) {
 }
 
 export async function deleteTaskAction(formData: FormData) {
-  await requireSessionUser();
+  const user = await requireSessionUser();
   const returnTo = normalizePath(formData.get("returnTo"), "/tasks");
+  const permissions = getPermissionsForUser(user);
+  assertPermission(permissions.canManageTasks, returnTo);
   if (!hasDeleteConfirmation(formData)) {
     redirectWithResult(returnTo, "task_deleted", "confirm_required");
   }
@@ -315,6 +335,8 @@ export async function deleteTaskAction(formData: FormData) {
 export async function createGoalAction(formData: FormData) {
   const user = await requireSessionUser();
   const returnTo = normalizePath(formData.get("returnTo"), "/goals");
+  const permissions = getPermissionsForUser(user);
+  assertPermission(permissions.canManageProjects, returnTo);
 
   await createGoal({
     title: String(formData.get("title") || "").trim(),
@@ -328,8 +350,10 @@ export async function createGoalAction(formData: FormData) {
 }
 
 export async function updateGoalProgressAction(formData: FormData) {
-  await requireSessionUser();
+  const user = await requireSessionUser();
   const returnTo = normalizePath(formData.get("returnTo"), "/goals");
+  const permissions = getPermissionsForUser(user);
+  assertPermission(permissions.canManageProjects, returnTo);
 
   await updateGoalProgress({
     goalId: String(formData.get("goalId") || "").trim(),
@@ -343,6 +367,8 @@ export async function updateGoalProgressAction(formData: FormData) {
 export async function createProcessStepAction(formData: FormData) {
   const user = await requireSessionUser();
   const returnTo = normalizePath(formData.get("returnTo"), "/process");
+  const permissions = getPermissionsForUser(user);
+  assertPermission(permissions.canManageProcess, returnTo);
 
   await createProcessStep({
     phase: String(formData.get("phase") || "General").trim(),
@@ -357,8 +383,10 @@ export async function createProcessStepAction(formData: FormData) {
 }
 
 export async function updateProcessStepStatusAction(formData: FormData) {
-  await requireSessionUser();
+  const user = await requireSessionUser();
   const returnTo = normalizePath(formData.get("returnTo"), "/process");
+  const permissions = getPermissionsForUser(user);
+  assertPermission(permissions.canManageProcess, returnTo);
 
   await updateProcessStepStatus({
     stepId: String(formData.get("stepId") || "").trim(),
@@ -372,6 +400,8 @@ export async function updateProcessStepStatusAction(formData: FormData) {
 export async function createDecisionAction(formData: FormData) {
   const user = await requireSessionUser();
   const returnTo = normalizePath(formData.get("returnTo"), "/process");
+  const permissions = getPermissionsForUser(user);
+  assertPermission(permissions.canManageProcess, returnTo);
 
   await createDecision({
     title: String(formData.get("title") || "").trim(),
@@ -386,8 +416,10 @@ export async function createDecisionAction(formData: FormData) {
 }
 
 export async function createDocAction(formData: FormData) {
-  await requireSessionUser();
+  const user = await requireSessionUser();
   const returnTo = normalizePath(formData.get("returnTo"), "/process");
+  const permissions = getPermissionsForUser(user);
+  assertPermission(permissions.canManageProcess, returnTo);
 
   await createDoc({
     title: String(formData.get("title") || "").trim(),
@@ -403,6 +435,8 @@ export async function createDocAction(formData: FormData) {
 export async function createWeeklyReviewAction(formData: FormData) {
   const user = await requireSessionUser();
   const returnTo = normalizePath(formData.get("returnTo"), "/weekly");
+  const permissions = getPermissionsForUser(user);
+  assertPermission(permissions.canManageProcess, returnTo);
 
   const { createWeeklyReview } = await import("@/lib/data-store");
 
@@ -421,6 +455,8 @@ export async function createWeeklyReviewAction(formData: FormData) {
 export async function deleteAllWeeklyReviewsAction(formData: FormData) {
   const user = await requireSessionUser();
   const returnTo = normalizePath(formData.get("returnTo"), "/weekly");
+  const permissions = getPermissionsForUser(user);
+  assertPermission(permissions.canManageProcess, returnTo);
   if (!hasDeleteConfirmation(formData)) {
     redirectWithResult(returnTo, "review_deleted", "confirm_required");
   }
@@ -436,6 +472,8 @@ export async function deleteAllWeeklyReviewsAction(formData: FormData) {
 export async function createMeetingAction(formData: FormData) {
   const user = await requireSessionUser();
   const returnTo = normalizePath(formData.get("returnTo"), "/meetings");
+  const permissions = getPermissionsForUser(user);
+  assertPermission(permissions.canManageMeetings, returnTo);
 
   await createMeeting({
     title: String(formData.get("title") || "").trim(),
@@ -453,8 +491,10 @@ export async function createMeetingAction(formData: FormData) {
 }
 
 export async function updateMeetingStatusAction(formData: FormData) {
-  await requireSessionUser();
+  const user = await requireSessionUser();
   const returnTo = normalizePath(formData.get("returnTo"), "/meetings");
+  const permissions = getPermissionsForUser(user);
+  assertPermission(permissions.canManageMeetings, returnTo);
 
   await updateMeetingStatus({
     meetingId: String(formData.get("meetingId") || "").trim(),
@@ -466,8 +506,10 @@ export async function updateMeetingStatusAction(formData: FormData) {
 }
 
 export async function deleteMeetingAction(formData: FormData) {
-  await requireSessionUser();
+  const user = await requireSessionUser();
   const returnTo = normalizePath(formData.get("returnTo"), "/meetings");
+  const permissions = getPermissionsForUser(user);
+  assertPermission(permissions.canManageMeetings, returnTo);
 
   const result = await deleteMeeting(String(formData.get("meetingId") || "").trim());
   revalidatePlannerViews();
@@ -478,6 +520,8 @@ export async function deleteMeetingAction(formData: FormData) {
 export async function createGalleryEntryAction(formData: FormData) {
   const user = await requireSessionUser();
   const returnTo = normalizePath(formData.get("returnTo"), "/gallery");
+  const permissions = getPermissionsForUser(user);
+  assertPermission(permissions.canUploadGallery, returnTo);
   const image = await parseGalleryImagePayload(formData);
   if (!image.ok) {
     redirectWithResult(returnTo, "gallery_entry", image.error);
@@ -502,8 +546,13 @@ export async function createGalleryEntryAction(formData: FormData) {
 }
 
 export async function updateGalleryWorkflowAction(formData: FormData) {
-  await requireSessionUser();
+  const user = await requireSessionUser();
   const returnTo = normalizePath(formData.get("returnTo"), "/gallery");
+  const permissions = getPermissionsForUser(user);
+  assertPermission(
+    permissions.canUpdateGalleryWorkflow || permissions.canApproveGallery,
+    returnTo,
+  );
 
   const result = await updateGalleryEntryWorkflow({
     entryId: String(formData.get("entryId") || "").trim(),
@@ -518,6 +567,8 @@ export async function updateGalleryWorkflowAction(formData: FormData) {
 export async function addGalleryCommentAction(formData: FormData) {
   const user = await requireSessionUser();
   const returnTo = normalizePath(formData.get("returnTo"), "/gallery");
+  const permissions = getPermissionsForUser(user);
+  assertPermission(permissions.canCommentGallery, returnTo);
 
   const result = await addGalleryEntryComment({
     entryId: String(formData.get("entryId") || "").trim(),
@@ -532,6 +583,8 @@ export async function addGalleryCommentAction(formData: FormData) {
 export async function createUserAction(formData: FormData) {
   const user = await requireSessionUser();
   const returnTo = normalizePath(formData.get("returnTo"), "/users");
+  const permissions = getPermissionsForUser(user);
+  assertPermission(permissions.canManageUsers, returnTo);
   const avatar = await parseAvatarPayload(formData);
   if (!avatar.ok) {
     redirectWithResult(returnTo, "user", avatar.error);
@@ -546,6 +599,7 @@ export async function createUserAction(formData: FormData) {
     bio: String(formData.get("bio") || "").trim(),
     avatarDataUrl: avatar.value || "",
     role: String(formData.get("role") || "Member") as PlannerRole,
+    projectRole: String(formData.get("projectRole") || "Observer") as ProjectRole,
     actorRole: user.role,
   });
 
@@ -556,6 +610,8 @@ export async function createUserAction(formData: FormData) {
 export async function updateUserAction(formData: FormData) {
   const user = await requireSessionUser();
   const returnTo = normalizePath(formData.get("returnTo"), "/users");
+  const permissions = getPermissionsForUser(user);
+  assertPermission(permissions.canManageUsers, returnTo);
   const avatar = await parseAvatarPayload(formData, { removeField: "removeAvatar" });
   if (!avatar.ok) {
     redirectWithResult(returnTo, "user_update", avatar.error);
@@ -567,6 +623,7 @@ export async function updateUserAction(formData: FormData) {
     name: String(formData.get("name") || "").trim(),
     email: String(formData.get("email") || "").trim(),
     password: String(formData.get("password") || "").trim(),
+    projectRole: String(formData.get("projectRole") || "Observer") as ProjectRole,
     jobTitle: String(formData.get("jobTitle") || "").trim(),
     phone: String(formData.get("phone") || "").trim(),
     bio: String(formData.get("bio") || "").trim(),
@@ -581,6 +638,8 @@ export async function updateUserAction(formData: FormData) {
 export async function deleteUserAction(formData: FormData) {
   const user = await requireSessionUser();
   const returnTo = normalizePath(formData.get("returnTo"), "/users");
+  const permissions = getPermissionsForUser(user);
+  assertPermission(permissions.canManageUsers, returnTo);
   if (!hasDeleteConfirmation(formData)) {
     redirectWithResult(returnTo, "user_deleted", "confirm_required");
   }
@@ -625,14 +684,18 @@ export async function updateProfileAction(formData: FormData) {
 export async function markNotificationsReadAction(formData: FormData) {
   const user = await requireSessionUser();
   const returnTo = normalizePath(formData.get("returnTo"), "/notifications");
+  const permissions = getPermissionsForUser(user);
+  assertPermission(permissions.canViewDashboard, returnTo);
   const result = await markAllNotificationsAsRead(user.id);
   revalidatePlannerViews();
   redirectWithResult(returnTo, "notifications", result.ok ? undefined : result.error);
 }
 
 export async function deleteGoalAction(formData: FormData) {
-  await requireSessionUser();
+  const user = await requireSessionUser();
   const returnTo = normalizePath(formData.get("returnTo"), "/goals");
+  const permissions = getPermissionsForUser(user);
+  assertPermission(permissions.canManageProjects, returnTo);
   if (!hasDeleteConfirmation(formData)) {
     redirectWithResult(returnTo, "goal_deleted", "confirm_required");
   }
@@ -643,8 +706,10 @@ export async function deleteGoalAction(formData: FormData) {
 }
 
 export async function deleteProcessStepAction(formData: FormData) {
-  await requireSessionUser();
+  const user = await requireSessionUser();
   const returnTo = normalizePath(formData.get("returnTo"), "/process");
+  const permissions = getPermissionsForUser(user);
+  assertPermission(permissions.canManageProcess, returnTo);
   if (!hasDeleteConfirmation(formData)) {
     redirectWithResult(returnTo, "step_deleted", "confirm_required");
   }
@@ -655,8 +720,10 @@ export async function deleteProcessStepAction(formData: FormData) {
 }
 
 export async function deleteDecisionAction(formData: FormData) {
-  await requireSessionUser();
+  const user = await requireSessionUser();
   const returnTo = normalizePath(formData.get("returnTo"), "/process");
+  const permissions = getPermissionsForUser(user);
+  assertPermission(permissions.canManageProcess, returnTo);
 
   const result = await deleteDecision(String(formData.get("decisionId") || "").trim());
   revalidatePlannerViews();
@@ -664,8 +731,10 @@ export async function deleteDecisionAction(formData: FormData) {
 }
 
 export async function deleteDocAction(formData: FormData) {
-  await requireSessionUser();
+  const user = await requireSessionUser();
   const returnTo = normalizePath(formData.get("returnTo"), "/process");
+  const permissions = getPermissionsForUser(user);
+  assertPermission(permissions.canManageProcess, returnTo);
 
   const result = await deleteDoc(String(formData.get("docId") || "").trim());
   revalidatePlannerViews();
@@ -675,6 +744,8 @@ export async function deleteDocAction(formData: FormData) {
 export async function sendChatMessageAction(formData: FormData) {
   const user = await requireSessionUser();
   const returnTo = normalizePath(formData.get("returnTo"), "/chat");
+  const permissions = getPermissionsForUser(user);
+  assertPermission(permissions.canUseChat, returnTo);
   const mode = String(formData.get("mode") || "group").trim().toLowerCase();
 
   const result = await sendChatMessage({

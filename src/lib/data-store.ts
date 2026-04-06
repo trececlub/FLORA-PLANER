@@ -6,6 +6,35 @@ import { sql } from "@vercel/postgres";
 
 export type PlannerRole = "CEO" | "CTO" | "Member";
 export type UserStatus = "Active" | "Disabled";
+export type ProjectRole =
+  | "ClientOwner"
+  | "ClientCollaborator"
+  | "ProjectManager"
+  | "HeadBrandingDesign"
+  | "CreativeDirector"
+  | "Stylist"
+  | "ContentCreator"
+  | "CommunityManager"
+  | "AdsSpecialist"
+  | "PublicRelations"
+  | "ArchitectInterior"
+  | "PackagingProducer"
+  | "ProductionVendors"
+  | "Observer";
+
+export type UserPermissions = {
+  canManageUsers: boolean;
+  canManageProjects: boolean;
+  canManageTasks: boolean;
+  canManageProcess: boolean;
+  canManageMeetings: boolean;
+  canUploadGallery: boolean;
+  canCommentGallery: boolean;
+  canUpdateGalleryWorkflow: boolean;
+  canApproveGallery: boolean;
+  canUseChat: boolean;
+  canViewDashboard: boolean;
+};
 
 export type PlannerUser = {
   id: string;
@@ -14,6 +43,7 @@ export type PlannerUser = {
   password: string;
   mustChangePassword: boolean;
   role: PlannerRole;
+  projectRole: ProjectRole;
   status: UserStatus;
   jobTitle: string;
   phone: string;
@@ -378,11 +408,189 @@ const LEGACY_SEED_DOC_IDS = new Set(["doc_1"]);
 const LEGACY_SEED_MEETING_IDS = new Set(["meeting_1"]);
 const LEGACY_SEED_CHAT_MESSAGE_IDS = new Set(["message_1"]);
 
+export const projectRoles: ProjectRole[] = [
+  "ClientOwner",
+  "ClientCollaborator",
+  "ProjectManager",
+  "HeadBrandingDesign",
+  "CreativeDirector",
+  "Stylist",
+  "ContentCreator",
+  "CommunityManager",
+  "AdsSpecialist",
+  "PublicRelations",
+  "ArchitectInterior",
+  "PackagingProducer",
+  "ProductionVendors",
+  "Observer",
+];
+
+export const projectRoleLabel: Record<ProjectRole, string> = {
+  ClientOwner: "Cliente / Dueño",
+  ClientCollaborator: "Cliente Colaborador",
+  ProjectManager: "Project Manager",
+  HeadBrandingDesign: "Head de Branding y Diseño",
+  CreativeDirector: "Director/a Creativo/a",
+  Stylist: "Stylist",
+  ContentCreator: "Creador/a de Contenido",
+  CommunityManager: "Community Manager",
+  AdsSpecialist: "Ads Specialist",
+  PublicRelations: "Relaciones Públicas (PR)",
+  ArchitectInterior: "Arquitecto/a / Interiorismo",
+  PackagingProducer: "Productor/a de Packaging",
+  ProductionVendors: "Producción / Proveedores",
+  Observer: "Observador",
+};
+
+const NO_PERMISSIONS: UserPermissions = {
+  canManageUsers: false,
+  canManageProjects: false,
+  canManageTasks: false,
+  canManageProcess: false,
+  canManageMeetings: false,
+  canUploadGallery: false,
+  canCommentGallery: false,
+  canUpdateGalleryWorkflow: false,
+  canApproveGallery: false,
+  canUseChat: false,
+  canViewDashboard: true,
+};
+
+const FULL_PERMISSIONS: UserPermissions = {
+  canManageUsers: true,
+  canManageProjects: true,
+  canManageTasks: true,
+  canManageProcess: true,
+  canManageMeetings: true,
+  canUploadGallery: true,
+  canCommentGallery: true,
+  canUpdateGalleryWorkflow: true,
+  canApproveGallery: true,
+  canUseChat: true,
+  canViewDashboard: true,
+};
+
+const PROJECT_ROLE_PERMISSIONS: Record<ProjectRole, UserPermissions> = {
+  ClientOwner: {
+    ...NO_PERMISSIONS,
+    canUploadGallery: true,
+    canCommentGallery: true,
+    canApproveGallery: true,
+    canUseChat: true,
+  },
+  ClientCollaborator: {
+    ...NO_PERMISSIONS,
+    canUploadGallery: true,
+    canCommentGallery: true,
+    canUseChat: true,
+  },
+  ProjectManager: {
+    ...NO_PERMISSIONS,
+    canManageProjects: true,
+    canManageTasks: true,
+    canManageProcess: true,
+    canManageMeetings: true,
+    canUploadGallery: true,
+    canCommentGallery: true,
+    canUpdateGalleryWorkflow: true,
+    canApproveGallery: true,
+    canUseChat: true,
+  },
+  HeadBrandingDesign: {
+    ...NO_PERMISSIONS,
+    canManageProjects: true,
+    canManageTasks: true,
+    canManageProcess: true,
+    canManageMeetings: true,
+    canUploadGallery: true,
+    canCommentGallery: true,
+    canUpdateGalleryWorkflow: true,
+    canApproveGallery: true,
+    canUseChat: true,
+  },
+  CreativeDirector: {
+    ...NO_PERMISSIONS,
+    canManageProjects: true,
+    canManageTasks: true,
+    canUploadGallery: true,
+    canCommentGallery: true,
+    canUpdateGalleryWorkflow: true,
+    canApproveGallery: true,
+    canUseChat: true,
+  },
+  Stylist: {
+    ...NO_PERMISSIONS,
+    canManageTasks: true,
+    canUploadGallery: true,
+    canCommentGallery: true,
+    canUseChat: true,
+  },
+  ContentCreator: {
+    ...NO_PERMISSIONS,
+    canManageTasks: true,
+    canUploadGallery: true,
+    canCommentGallery: true,
+    canUseChat: true,
+  },
+  CommunityManager: {
+    ...NO_PERMISSIONS,
+    canManageTasks: true,
+    canUploadGallery: true,
+    canCommentGallery: true,
+    canUseChat: true,
+  },
+  AdsSpecialist: {
+    ...NO_PERMISSIONS,
+    canManageTasks: true,
+    canUploadGallery: true,
+    canCommentGallery: true,
+    canUseChat: true,
+  },
+  PublicRelations: {
+    ...NO_PERMISSIONS,
+    canManageTasks: true,
+    canUploadGallery: true,
+    canCommentGallery: true,
+    canUseChat: true,
+  },
+  ArchitectInterior: {
+    ...NO_PERMISSIONS,
+    canManageTasks: true,
+    canUploadGallery: true,
+    canCommentGallery: true,
+    canUseChat: true,
+  },
+  PackagingProducer: {
+    ...NO_PERMISSIONS,
+    canManageTasks: true,
+    canUploadGallery: true,
+    canCommentGallery: true,
+    canUseChat: true,
+  },
+  ProductionVendors: {
+    ...NO_PERMISSIONS,
+    canManageTasks: true,
+    canUploadGallery: true,
+    canCommentGallery: true,
+    canUseChat: true,
+  },
+  Observer: {
+    ...NO_PERMISSIONS,
+  },
+};
+
 function normalizeProjectStatus(value: unknown): ProjectStatus {
   if (value === "InProgress") return "InProgress";
   if (value === "Blocked") return "Blocked";
   if (value === "Done") return "Done";
   return "Planned";
+}
+
+function normalizeProjectRole(value: unknown, fallbackRole: PlannerRole): ProjectRole {
+  const role = String(value || "").trim() as ProjectRole;
+  if (projectRoles.includes(role)) return role;
+  if (fallbackRole === "CEO") return "ProjectManager";
+  return "Observer";
 }
 
 function normalizeProjectPriority(value: unknown): ProjectPriority {
@@ -467,6 +675,14 @@ export function isProtectedRole(role: PlannerRole | string | undefined) {
   return role === "CEO" || role === "Owner";
 }
 
+export function getPermissionsForUser(user: PlannerUser | null | undefined): UserPermissions {
+  if (!user) return { ...NO_PERMISSIONS };
+  if (canManageUsers(user.role)) return { ...FULL_PERMISSIONS };
+  return {
+    ...PROJECT_ROLE_PERMISSIONS[user.projectRole || "Observer"],
+  };
+}
+
 function getDefaultCeo(): PlannerUser {
   const email = (
     process.env.FLORA_PLANER_ADMIN_EMAIL ||
@@ -492,6 +708,7 @@ function getDefaultCeo(): PlannerUser {
     password,
     mustChangePassword: false,
     role: "CEO",
+    projectRole: "ProjectManager",
     status: "Active",
     jobTitle: "Administrador del proyecto",
     phone: "",
@@ -603,6 +820,7 @@ function normalizeUsers(rawUsers: unknown) {
               ? false
               : true,
         role,
+        projectRole: normalizeProjectRole(user.projectRole, role),
         status: normalizeUserStatus(user.status),
         jobTitle: String(user.jobTitle || defaultTitle).trim(),
         phone: String(user.phone || "").trim(),
@@ -626,6 +844,7 @@ function normalizeUsers(rawUsers: unknown) {
       id: "user_owner",
       mustChangePassword: false,
       role: "CEO" as const,
+      projectRole: "ProjectManager" as const,
       status: "Active" as const,
     },
     ...withoutManagers,
@@ -1598,6 +1817,7 @@ export async function validateUserCredentials(email: string, password: string) {
         email: configuredAdmin.email,
         password: fallbackPassword,
         role: "CEO",
+        projectRole: "ProjectManager",
         status: "Active",
         mustChangePassword: false,
         jobTitle: configuredAdmin.jobTitle,
@@ -1610,6 +1830,7 @@ export async function validateUserCredentials(email: string, password: string) {
         ...configuredAdmin,
         id: "user_owner",
         role: "CEO",
+        projectRole: "ProjectManager",
         status: "Active",
         mustChangePassword: false,
         password: fallbackPassword,
@@ -1621,6 +1842,7 @@ export async function validateUserCredentials(email: string, password: string) {
       ...configuredAdmin,
       id: "user_owner",
       role: "CEO",
+      projectRole: "ProjectManager",
       status: "Active",
       mustChangePassword: false,
       password: fallbackPassword,
@@ -1654,6 +1876,7 @@ export async function validateUserCredentials(email: string, password: string) {
         "flora123",
       mustChangePassword: false,
       role: "CEO",
+      projectRole: "ProjectManager",
       status: "Active",
       jobTitle: "Administrador del proyecto",
       phone: "",
@@ -1682,6 +1905,7 @@ export async function validateUserCredentials(email: string, password: string) {
       password: fallbackPassword,
       mustChangePassword: matchedFallback.mustChangePassword,
       role: matchedFallback.role,
+      projectRole: matchedFallback.projectRole,
       status: "Active",
       jobTitle: matchedFallback.jobTitle,
       phone: matchedFallback.phone,
@@ -2320,6 +2544,7 @@ export async function createUser(input: {
   bio: string;
   avatarDataUrl?: string;
   role: PlannerRole;
+  projectRole: ProjectRole;
   actorRole: PlannerRole;
 }) {
   if (!canManageUsers(input.actorRole)) {
@@ -2344,8 +2569,10 @@ export async function createUser(input: {
     password: await hashPassword(input.password),
     mustChangePassword: true,
     role: "Member",
+    projectRole: normalizeProjectRole(input.projectRole, "Member"),
     status: "Active",
-    jobTitle: input.jobTitle.trim() || "Team Member",
+    jobTitle:
+      input.jobTitle.trim() || projectRoleLabel[normalizeProjectRole(input.projectRole, "Member")],
     phone: input.phone.trim(),
     bio: input.bio.trim(),
     avatarDataUrl: safeAvatarUrl(input.avatarDataUrl),
@@ -2369,6 +2596,7 @@ export async function updateUserByManager(input: {
   name: string;
   email: string;
   password: string;
+  projectRole: ProjectRole;
   jobTitle: string;
   phone: string;
   bio: string;
@@ -2405,6 +2633,7 @@ export async function updateUserByManager(input: {
       ? await hashPassword(input.password.trim())
       : target.password,
     mustChangePassword: input.password.trim() ? true : target.mustChangePassword,
+    projectRole: normalizeProjectRole(input.projectRole, target.role),
     jobTitle: input.jobTitle.trim() || target.jobTitle,
     phone: input.phone.trim(),
     bio: input.bio.trim(),

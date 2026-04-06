@@ -3,26 +3,36 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import type { UserPermissions } from "@/lib/data-store";
 
 type NavItem = {
   href: string;
   label: string;
+  visible: (permissions: UserPermissions) => boolean;
 };
 
 const items: NavItem[] = [
-  { href: "/dashboard", label: "Inicio" },
-  { href: "/projects", label: "Proyectos" },
-  { href: "/tasks", label: "Tareas" },
-  { href: "/goals", label: "Metas" },
-  { href: "/notifications", label: "Notificaciones" },
-  { href: "/chat", label: "Chat" },
-  { href: "/meetings", label: "Reuniones" },
-  { href: "/process", label: "Proceso" },
-  { href: "/gallery", label: "Galeria" },
-  { href: "/timeline", label: "Timeline" },
-  { href: "/weekly", label: "Semanal" },
-  { href: "/profile", label: "Perfil" },
-  { href: "/users", label: "Equipo" },
+  { href: "/dashboard", label: "Inicio", visible: (permissions) => permissions.canViewDashboard },
+  { href: "/projects", label: "Proyectos", visible: (permissions) => permissions.canManageProjects },
+  { href: "/tasks", label: "Tareas", visible: (permissions) => permissions.canManageTasks },
+  { href: "/goals", label: "Metas", visible: (permissions) => permissions.canManageProjects },
+  { href: "/notifications", label: "Notificaciones", visible: (permissions) => permissions.canViewDashboard },
+  { href: "/chat", label: "Chat", visible: (permissions) => permissions.canUseChat },
+  { href: "/meetings", label: "Reuniones", visible: (permissions) => permissions.canManageMeetings },
+  { href: "/process", label: "Proceso", visible: (permissions) => permissions.canManageProcess },
+  {
+    href: "/gallery",
+    label: "Galeria",
+    visible: (permissions) =>
+      permissions.canUploadGallery ||
+      permissions.canCommentGallery ||
+      permissions.canUpdateGalleryWorkflow ||
+      permissions.canApproveGallery,
+  },
+  { href: "/timeline", label: "Timeline", visible: (permissions) => permissions.canViewDashboard },
+  { href: "/weekly", label: "Semanal", visible: (permissions) => permissions.canManageProcess },
+  { href: "/profile", label: "Perfil", visible: () => true },
+  { href: "/users", label: "Equipo", visible: (permissions) => permissions.canManageUsers },
 ];
 
 function isActive(pathname: string, href: string) {
@@ -30,9 +40,8 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-function visibleItems(role: string) {
-  const canManage = role === "CEO" || role === "Owner";
-  return items.filter((item) => (item.href === "/users" ? canManage : true));
+function visibleItems(permissions: UserPermissions) {
+  return items.filter((item) => item.visible(permissions));
 }
 
 function useUnreadBadges(initialHasChatUnread: boolean, initialHasNotificationUnread: boolean) {
@@ -122,11 +131,11 @@ function navLabel(item: NavItem, hasChatUnread: boolean, hasNotificationUnread: 
 }
 
 export function PlannerSidebarNav({
-  role,
+  permissions,
   initialHasChatUnread = false,
   initialHasNotificationUnread = false,
 }: {
-  role: string;
+  permissions: UserPermissions;
   initialHasChatUnread?: boolean;
   initialHasNotificationUnread?: boolean;
 }) {
@@ -135,7 +144,7 @@ export function PlannerSidebarNav({
 
   return (
     <nav className="planner-sidebar-nav">
-      {visibleItems(role).map((item) => {
+      {visibleItems(permissions).map((item) => {
         const active = isActive(pathname, item.href);
         return (
           <Link
@@ -152,11 +161,11 @@ export function PlannerSidebarNav({
 }
 
 export function PlannerMobileTabs({
-  role,
+  permissions,
   initialHasChatUnread = false,
   initialHasNotificationUnread = false,
 }: {
-  role: string;
+  permissions: UserPermissions;
   initialHasChatUnread?: boolean;
   initialHasNotificationUnread?: boolean;
 }) {
@@ -165,7 +174,7 @@ export function PlannerMobileTabs({
 
   return (
     <nav className="planner-mobile-tabs" aria-label="Secciones">
-      {visibleItems(role).map((item) => {
+      {visibleItems(permissions).map((item) => {
         const active = isActive(pathname, item.href);
         return (
           <Link
