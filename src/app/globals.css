@@ -1,21 +1,21 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #edf6ee;
-  --surface: #f8fdf8;
-  --surface-soft: #eef8ef;
-  --ink: #193126;
-  --ink-soft: #4f6d5d;
-  --line: #c8decb;
+  --bg: #f1f5fc;
+  --surface: #f8fbff;
+  --surface-soft: #eef4ff;
+  --ink: #1d2945;
+  --ink-soft: #5f6f91;
+  --line: #d3dff3;
   --accent: #2d8a57;
-  --accent-soft: #ddf3e4;
+  --accent-soft: #e5eeff;
   --ok: #2f7a53;
   --ok-soft: #e7f5ed;
   --warning: #5a8241;
   --warning-soft: #edf7e3;
   --critical: #a94343;
   --critical-soft: #fde9e8;
-  --shadow: 0 14px 34px rgba(23, 66, 41, 0.1);
+  --shadow: 0 14px 34px rgba(33, 59, 110, 0.12);
 }
 
 * {
@@ -25,9 +25,9 @@
 body.planner-body {
   margin: 0;
   background:
-    radial-gradient(circle at 12% 8%, #d8efdb 0%, transparent 32%),
-    radial-gradient(circle at 88% 10%, #cde7d0 0%, transparent 34%),
-    linear-gradient(180deg, #f6fcf6 0%, var(--bg) 100%);
+    radial-gradient(circle at 12% 8%, #e6eeff 0%, transparent 32%),
+    radial-gradient(circle at 88% 10%, #dbe6ff 0%, transparent 34%),
+    linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
   color: var(--ink);
   font-family: var(--font-body), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   overflow-x: hidden;
@@ -997,7 +997,7 @@ textarea:focus {
   border: 1px solid var(--line);
   border-radius: 14px;
   overflow: hidden;
-  background: color-mix(in srgb, var(--surface) 92%, #d7eddc 8%);
+  background: color-mix(in srgb, var(--surface) 92%, #dce8ff 8%);
   box-shadow: var(--shadow);
 }
 
@@ -1005,8 +1005,8 @@ textarea:focus {
   width: 100%;
   aspect-ratio: 16 / 10;
   background:
-    radial-gradient(circle at 18% 15%, #dff2e2 0%, transparent 50%),
-    linear-gradient(180deg, #edf8ef 0%, #cfdfd1 100%);
+    radial-gradient(circle at 18% 15%, #e4ecff 0%, transparent 50%),
+    linear-gradient(180deg, #eff4ff 0%, #d8e2f8 100%);
 }
 
 .gallery-image {
