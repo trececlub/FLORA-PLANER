@@ -476,6 +476,13 @@ export async function createMeetingAction(formData: FormData) {
   const returnTo = normalizePath(formData.get("returnTo"), "/meetings");
   const permissions = getPermissionsForUser(user);
   assertPermission(permissions.canManageMeetings, returnTo);
+  const attendeeUserIds = formData
+    .getAll("attendeeUserIds")
+    .map((value) => String(value || "").trim())
+    .filter(Boolean);
+  const attendeesCsv = String(
+    formData.get("attendeesExtra") || formData.get("attendees") || "",
+  ).trim();
 
   await createMeeting({
     title: String(formData.get("title") || "").trim(),
@@ -483,7 +490,8 @@ export async function createMeetingAction(formData: FormData) {
     date: String(formData.get("date") || "").trim(),
     startTime: String(formData.get("startTime") || "").trim(),
     endTime: String(formData.get("endTime") || "").trim(),
-    attendeesCsv: String(formData.get("attendees") || "").trim(),
+    attendeesCsv,
+    attendeeUserIds,
     notes: String(formData.get("notes") || "").trim(),
     ownerId: user.id,
   });

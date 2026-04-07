@@ -257,7 +257,7 @@ export type GalleryComment = {
   createdAt: string;
 };
 
-export type NotificationKind = "TaskAssigned" | "General";
+export type NotificationKind = "TaskAssigned" | "MeetingAssigned" | "General";
 
 export type UserNotification = {
   id: string;
@@ -1278,6 +1278,7 @@ function normalizeGalleryComments(
 
 function normalizeNotificationKind(value: unknown): NotificationKind {
   if (value === "TaskAssigned") return "TaskAssigned";
+  if (value === "MeetingAssigned") return "MeetingAssigned";
   return "General";
 }
 
@@ -2403,11 +2404,29 @@ export async function createMeeting(input: {
   startTime: string;
   endTime: string;
   attendeesCsv: string;
+  attendeeUserIds?: string[];
   notes: string;
   ownerId: string;
 }) {
   const data = await readPlannerData();
   const createdAt = nowIso();
+  const activeUserById = new Map(
+    data.users
+      .filter((user) => user.status === "Active")
+      .map((user) => [user.id, user]),
+  );
+
+  const attendeeUserIds = [...new Set(
+    (Array.isArray(input.attendeeUserIds) ? input.attendeeUserIds : [])
+      .map((value) => String(value || "").trim())
+      .filter((value) => activeUserById.has(value)),
+  )];
+
+  const attendeeNamesFromUsers = attendeeUserIds
+    .map((userId) => activeUserById.get(userId)?.name)
+    .filter(Boolean) as string[];
+  const attendeeNamesFromText = splitCsv(input.attendeesCsv);
+  const attendees = [...new Set([...attendeeNamesFromUsers, ...attendeeNamesFromText])];
 
   const meeting: Meeting = {
     id: randomUUID(),
@@ -2417,7 +2436,7 @@ export async function createMeeting(input: {
     date: safeDate(input.date),
     startTime: String(input.startTime || "").trim(),
     endTime: String(input.endTime || "").trim(),
-    attendees: splitCsv(input.attendeesCsv),
+    attendees,
     notes: input.notes.trim(),
     ownerId: input.ownerId,
     createdAt,
@@ -2425,6 +2444,24 @@ export async function createMeeting(input: {
   };
 
   data.meetings.unshift(meeting);
+  const scheduleLabel = [meeting.date, meeting.startTime && `${meeting.startTime} - ${meeting.endTime || "--:--"}`]
+    .filter(Boolean)
+    .join(" · ");
+  const descriptionParts = [meeting.title.trim(), scheduleLabel].filter(Boolean);
+
+  for (const userId of attendeeUserIds) {
+    if (userId === input.ownerId) continue;
+    data.notifications.unshift({
+      id: randomUUID(),
+      userId,
+      kind: "MeetingAssigned",
+      title: "Nueva reunion asignada",
+      description: descriptionParts.join(" · "),
+      linkPath: "/meetings",
+      createdAt,
+    });
+  }
+
   await writePlannerData(data);
   return meeting;
 }

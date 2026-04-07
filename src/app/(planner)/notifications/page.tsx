@@ -31,7 +31,7 @@ export default async function NotificationsPage({ searchParams }: PageProps) {
 
       <SectionCard
         title="Bandeja"
-        subtitle="Cuando una tarea te sea asignada aparecera aqui."
+        subtitle="Cuando te asignen tareas o reuniones, te avisaremos aqui."
         action={
           <form action={markNotificationsReadAction}>
             <input type="hidden" name="returnTo" value="/notifications" />
@@ -44,7 +44,7 @@ export default async function NotificationsPage({ searchParams }: PageProps) {
         {notifications.length === 0 ? (
           <EmptyState
             title="Sin notificaciones"
-            detail="Cuando te asignen tareas o novedades del proyecto las veras aqui."
+            detail="Cuando te asignen tareas, reuniones o novedades del proyecto las veras aqui."
           />
         ) : (
           <div className="stack-list">

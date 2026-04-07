@@ -5,6 +5,7 @@ import {
 } from "@/app/(planner)/actions";
 import { PlannerPage, SaveMessage } from "@/components/planner-page";
 import { Badge, EmptyState, SectionCard } from "@/components/ui";
+import { requireSessionUser } from "@/lib/auth";
 import { getPlannerSnapshot } from "@/lib/data-store";
 import {
   dateFormat,
@@ -24,10 +25,12 @@ function strParam(value: string | string[] | undefined) {
 }
 
 export default async function MeetingsPage({ searchParams }: PageProps) {
+  const currentUser = await requireSessionUser();
   const params = await searchParams;
   const saved = strParam(params.saved);
   const error = strParam(params.error);
   const snapshot = await getPlannerSnapshot();
+  const activeUsers = snapshot.users.filter((user) => user.status === "Active");
 
   return (
     <PlannerPage
@@ -65,9 +68,25 @@ export default async function MeetingsPage({ searchParams }: PageProps) {
               Hora fin
               <input name="endTime" type="time" />
             </label>
+            <fieldset className="meeting-attendees-picker">
+              <legend>Asistentes del equipo</legend>
+              <div className="meeting-attendees-grid">
+                {activeUsers.map((user) => (
+                  <label key={user.id} className="checkbox-line meeting-attendee-option">
+                    <input
+                      type="checkbox"
+                      name="attendeeUserIds"
+                      value={user.id}
+                      defaultChecked={user.id === currentUser.id}
+                    />
+                    <span>{user.name}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
             <label>
-              Asistentes
-              <input name="attendees" placeholder="CEO, CTO, Cliente X" />
+              Asistentes externos (opcional)
+              <input name="attendeesExtra" placeholder="Cliente X, proveedor, invitado" />
             </label>
             <label>
               Notas
